@@ -156,13 +156,11 @@ EventInfoTreeProducer::EventInfoTreeProducer(const edm::ParameterSet& iConfig) :
 {
   //input tokens
   tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
-  tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
+  tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("VertexCollection"));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
 
   isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
-  cout << " &&&&&&&&&&&&&&&&&& " << endl;
-  cout << "isCentrality_ = " << isCentrality_ << endl;
-  cout << " &&&&&&&&&&&&&&&&&& " << endl;
+ 
 
   isData_cent_=iConfig.getUntrackedParameter<bool>("isData_cent");
   isMC_cent_=iConfig.getUntrackedParameter<bool>("isMC_cent");
@@ -301,8 +299,10 @@ EventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup&
       
     edm::Handle<int> cbin;
     iEvent.getByToken(tok_centBinLabel_, cbin);
-    if(isData_cent_){centrality = (cbin.isValid() ? *cbin : -1);}
-    if(isMC_cent_){centrality = getHiBinFromhiHF(HFsumET);}
+    centrality = (cbin.isValid() ? *cbin : -1);
+
+    //if(isData_cent_){centrality = (cbin.isValid() ? *cbin : -1);}
+    //if(isMC_cent_){centrality = getHiBinFromhiHF(HFsumET);}
 
 
   }
