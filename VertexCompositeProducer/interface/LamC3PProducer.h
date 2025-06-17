@@ -52,6 +52,8 @@ private:
 
   bool useAnyMVA_;
 
+  std::vector<std::vector<int>> selectedTkhidxSetVec;
+  
   LamC3PFitter theVees; 
 //  edm::ParameterSet theParams;
 };
