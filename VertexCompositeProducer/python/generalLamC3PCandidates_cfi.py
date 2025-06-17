@@ -3,8 +3,10 @@ import FWCore.ParameterSet.Config as cms
 generalLamC3PCandidates = cms.EDProducer("LamC3PProducer",
                                      
     # InputTag that tells which TrackCollection to use for vertexing
-    trackRecoAlgorithm = cms.InputTag('generalTracks'),
-    vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
+    #trackRecoAlgorithm = cms.InputTag('generalTracks'),
+                                         trackRecoAlgorithm = cms.InputTag('packedPFCandidates'),
+                                         #packedPFCandidates_ = cms.InputTag("packedPFCandidates"),
+                                         vertexRecoAlgorithm = cms.InputTag('offlineSlimmedPrimaryVertices'),
 
     trackQualities = cms.vstring('highPurity'),
                                      
@@ -41,7 +43,10 @@ generalLamC3PCandidates = cms.EDProducer("LamC3PProducer",
     dPt3Cut = cms.double(1.0),
 
     isWrongSign = cms.bool(False),
-
+    #Nihar
+    dPtCut = cms.double(1.0),
+    dRapidityCut = cms.double(2.4),
+                                         
     # MVA 
 
     useAnyMVA = cms.bool(False),
