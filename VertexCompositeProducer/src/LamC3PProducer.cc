@@ -24,7 +24,8 @@
 
 // Constructor
 LamC3PProducer::LamC3PProducer(const edm::ParameterSet& iConfig) :
- theVees(iConfig, consumesCollector())
+  //theVees(iConfig, consumesCollector())
+theVees(iConfig, consumesCollector(), selectedTkhidxSetVec)
 {
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
