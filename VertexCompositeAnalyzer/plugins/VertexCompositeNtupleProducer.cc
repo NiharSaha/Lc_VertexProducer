@@ -96,8 +96,9 @@ private:
   virtual void initHistogram();
   virtual void initTree();
 
-  int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
-
+  //int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
+  int muAssocToTrack(const pat::PackedCandidate* cand, const edm::Handle<reco::MuonCollection>& muonh) const;
+  
   // ----------member data ---------------------------
     
     edm::Service<TFileService> fs;
@@ -532,8 +533,8 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
     
     //Ntrkoffline
     Ntrkoffline = 0;
-    //if(multMax_!=-1 && multMin_!=-1)
-    //{
+    if(multMax_!=-1 && multMin_!=-1)
+    {
       for(unsigned it=0; it<tracks->size(); ++it){
         
 
@@ -573,7 +574,7 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
         if(pt<=0.4) continue;
         Ntrkoffline++;
       }
-      //}
+    }
 
     //Gen info for matching
     if(doGenMatching_)
@@ -611,7 +612,10 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
             const reco::Candidate * Dd2 = trk.daughter(1);
             const reco::Candidate * Dd3 = 0;            
 
-            if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
+
+
+
+	    if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
 
             if(threeProngDecay_)
             {
@@ -684,11 +688,27 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
         double pz = trk.pz();
         mass = trk.mass();
         
-        const reco::Candidate * d1 = trk.daughter(0);
+        /*const reco::Candidate * d1 = trk.daughter(0);
         const reco::Candidate * d2 = trk.daughter(1);
         const reco::Candidate * d3 = 0;        
         if(threeProngDecay_) d3 = trk.daughter(2);
+	*/
 
+	
+	const reco::Candidate* cand1 = trk.daughter(0);
+        const pat::PackedCandidate* d1 = dynamic_cast<const pat::PackedCandidate*>(cand1);
+
+        const reco::Candidate* cand2 = trk.daughter(1);
+        const pat::PackedCandidate* d2 = dynamic_cast<const pat::PackedCandidate*>(cand2);
+
+        const pat::PackedCandidate* d3 = nullptr;
+        if (threeProngDecay_) {
+          const reco::Candidate* cand3 = trk.daughter(2);
+          d3 = dynamic_cast<const pat::PackedCandidate*>(cand3);
+        }
+
+
+	
         //Gen match
         if(doGenMatching_)
         {
@@ -1017,58 +1037,87 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
         dlos2D = dl2D/dl2Derror;
 
         //trk info
-        auto dau1 = d1->get<reco::TrackRef>();
-        if(!twoLayerDecay_)
+        //auto dau1 = d1->get<reco::TrackRef>();
+
+	const pat::PackedCandidate* dau1 = dynamic_cast<const pat::PackedCandidate*>(d1);
+	const reco::Track& pseudoTrk1 = dau1->pseudoTrack();
+
+	trkChi1 = pseudoTrk1.normalizedChi2();
+        ptErr1 = pseudoTrk1.ptError();
+        nhit1 = pseudoTrk1.hitPattern().numberOfValidHits();
+        trkquality1 = pseudoTrk1.quality(reco::TrackBase::highPurity);
+	
+	
+	if(!twoLayerDecay_)
         {
             //trk quality
-            trkquality1 = dau1->quality(reco::TrackBase::highPurity);
-            
-            //trk dEdx
-            H2dedx1 = -999.9;
+            //trkquality1 = dau1->quality(reco::TrackBase::highPurity);
+	  trkquality1 = pseudoTrk1.quality(reco::TrackBase::highPurity);    
+
+	  //trk dEdx
+	  /*H2dedx1 = -999.9;
             
             if(dEdxHandle1.isValid()){
                 const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
                 H2dedx1 = dEdxTrack[dau1].dEdx();
-            }
-            
+	    }
+
+	    	    
             T4dedx1 = -999.9;
             
             if(dEdxHandle2.isValid()){
                 const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
                 T4dedx1 = dEdxTrack[dau1].dEdx();
-            }
+	    }
+	  */
             
             //track Chi2
-            trkChi1 = dau1->normalizedChi2();
+            //trkChi1 = dau1->normalizedChi2();
             
             //track pT error
-            ptErr1 = dau1->ptError();
+            //ptErr1 = dau1->ptError();
             
             //vertexCovariance 00-xError 11-y 22-z
-            secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
+            //secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
             
             //trkNHits
-            nhit1 = dau1->numberOfValidHits();
+            //nhit1 = dau1->numberOfValidHits();
             
             //DCA
             math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
             
-            double dzbest1 = dau1->dz(bestvtx);
+            /*double dzbest1 = dau1->dz(bestvtx);
             double dxybest1 = dau1->dxy(bestvtx);
             double dzerror1 = sqrt(dau1->dzError()*dau1->dzError()+bestvzError*bestvzError);
             double dxyerror1 = sqrt(dau1->d0Error()*dau1->d0Error()+bestvxError*bestvyError);
-            
+	    */
+	    
+	    double dzbest1 = dau1->dz(bestvtx);
+            double dxybest1 = dau1->dxy(bestvtx);
+            double dzerror1 = std::sqrt(pseudoTrk1.dzError() * pseudoTrk1.dzError() + bestvzError * bestvzError);
+            double dxyerror1 = std::sqrt(pseudoTrk1.d0Error() * pseudoTrk1.d0Error() + bestvxError * bestvyError);
+
+            dzos1 = dzbest1/dzerror1;
+            dxyos1 = dxybest1/dxyerror1;
             dzos1 = dzbest1/dzerror1;
             dxyos1 = dxybest1/dxyerror1;
         }
         
-        auto dau2 = d2->get<reco::TrackRef>();
+        //auto dau2 = d2->get<reco::TrackRef>();
         
         //trk quality
-        trkquality2 = dau2->quality(reco::TrackBase::highPurity);
-        
+        //trkquality2 = dau2->quality(reco::TrackBase::highPurity);
+
+	const pat::PackedCandidate* dau2 = dynamic_cast<const pat::PackedCandidate*>(d2);
+
+        const reco::Track& pseudoTrk2 = dau2->pseudoTrack();
+        trkChi2 = pseudoTrk2.normalizedChi2();
+        ptErr2 = pseudoTrk2.ptError();
+        nhit2 = pseudoTrk2.hitPattern().numberOfValidHits();
+        trkquality2 = pseudoTrk2.quality(reco::TrackBase::highPurity);
+	
         //trk dEdx
-        H2dedx2 = -999.9;
+        /*H2dedx2 = -999.9;
         
         if(dEdxHandle1.isValid()){
             const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
@@ -1081,27 +1130,31 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
             const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
             T4dedx2 = dEdxTrack[dau2].dEdx();
         }
-        
+        */
+
+	
         //track Chi2
-        trkChi2 = dau2->normalizedChi2();
+        //trkChi2 = dau2->normalizedChi2();
         
         //track pT error
-        ptErr2 = dau2->ptError();
+        //ptErr2 = dau2->ptError();
         
         //vertexCovariance 00-xError 11-y 22-z
         secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
         
         //trkNHits
-        nhit2 = dau2->numberOfValidHits();
+        //nhit2 = dau2->numberOfValidHits();
         
         //DCA
         math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
         double dzbest2 = dau2->dz(bestvtx);
         double dxybest2 = dau2->dxy(bestvtx);
-        double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
-        double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
-        
+        //double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
+        //double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
+        double dzerror2 = std::sqrt(pseudoTrk2.dzError() * pseudoTrk2.dzError() + bestvzError * bestvzError);
+        double dxyerror2 = std::sqrt(pseudoTrk2.d0Error() * pseudoTrk2.d0Error() + bestvxError * bestvyError);
+	
         dzos2 = dzbest2/dzerror2;
         dxyos2 = dxybest2/dxyerror2;
         
@@ -1873,7 +1926,7 @@ VertexCompositeNtupleProducer::initTree()
     }
 }
 
-int VertexCompositeNtupleProducer::
+/*int VertexCompositeNtupleProducer::
 muAssocToTrack( const reco::TrackRef& trackref,
                 const edm::Handle<reco::MuonCollection>& muonh) const {
   auto muon = std::find_if(muonh->cbegin(),muonh->cend(),
@@ -1882,7 +1935,26 @@ muAssocToTrack( const reco::TrackRef& trackref,
                                       m.track() == trackref    );
                            });
   return ( muon != muonh->cend() ? std::distance(muonh->cbegin(),muon) : -1 );
+  }*/
+
+int VertexCompositeNtupleProducer::muAssocToTrack(const pat::PackedCandidate* cand,
+               const edm::Handle<reco::MuonCollection>& muonh) const {
+  if (!cand || !cand->hasTrackDetails()) return -1;
+
+  const reco::Track& trk = cand->pseudoTrack();
+
+  auto muon = std::find_if(muonh->cbegin(), muonh->cend(),
+                           [&](const reco::Muon& m) {
+                             return (m.track().isNonnull() &&
+                                     m.track()->charge() == trk.charge() &&
+                                     std::abs(m.track()->pt() - trk.pt()) / trk.pt() < 0.05 &&
+                                     deltaR(m.track()->eta(), m.track()->phi(),
+                                            trk.eta(), trk.phi()) < 0.02);
+                           });
+
+  return (muon != muonh->cend() ? std::distance(muonh->cbegin(), muon) : -1);
 }
+
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
