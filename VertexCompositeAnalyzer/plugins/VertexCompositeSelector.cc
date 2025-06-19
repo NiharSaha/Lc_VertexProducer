@@ -99,8 +99,8 @@ private:
   virtual void endJob() ;
 
   double GetMVACut(double y, double pt);
-  int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
-
+  //int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
+  int muAssocToTrack(const pat::PackedCandidate* cand, const edm::Handle<reco::MuonCollection>& muonh) const;
   // ----------member data ---------------------------
     
     //options
@@ -525,16 +525,16 @@ VertexCompositeSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
     fillRECO(iEvent,iSetup);
 
-//    std::make_unique< reco::VertexCompositeCandidateCollection > theNewV0Cands( new reco::VertexCompositeCandidateCollection );
-    auto theNewV0Cands = std::make_unique<reco::VertexCompositeCandidateCollection>();
+//    std::make_unique< reco::VertexCompositeCandidateCollection > theNewLcCands( new reco::VertexCompositeCandidateCollection );
+    auto theNewLcCands = std::make_unique<reco::VertexCompositeCandidateCollection>();
 
-    theNewV0Cands->reserve( theVertexComps.size() );
+    theNewLcCands->reserve( theVertexComps.size() );
 
     std::copy( theVertexComps.begin(),
                theVertexComps.end(),
-               std::back_inserter(*theNewV0Cands) );
+               std::back_inserter(*theNewLcCands) );
 
-    iEvent.put(std::move(theNewV0Cands), v0IDName_);
+    iEvent.put(std::move(theNewLcCands), v0IDName_);
     theVertexComps.clear();
 
     //std::cout<<"[DEBUG] correct-1"<<std::endl;
@@ -770,11 +770,33 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         mass = trk.mass();
 
 	
-        const reco::Candidate * d1 = trk.daughter(0);
+        /*const reco::Candidate * d1 = trk.daughter(0);
         const reco::Candidate * d2 = trk.daughter(1);
         const reco::Candidate * d3 = 0;
         if(threeProngDecay_) d3 = trk.daughter(2);        
+	*/
 
+	const reco::Candidate* cand1 = trk.daughter(0);
+	const pat::PackedCandidate* d1 = dynamic_cast<const pat::PackedCandidate*>(cand1);
+	
+	const reco::Candidate* cand2 = trk.daughter(1);
+	const pat::PackedCandidate* d2 = dynamic_cast<const pat::PackedCandidate*>(cand2);
+	
+	const pat::PackedCandidate* d3 = nullptr;
+	if (threeProngDecay_) {
+	  const reco::Candidate* cand3 = trk.daughter(2);
+	  d3 = dynamic_cast<const pat::PackedCandidate*>(cand3);
+	}
+
+
+	if (!d1 || !d2) {
+	  std::cout << "NULL pointer for d1 or d2. Skipping candidate." << std::endl;
+	  continue;
+	}
+
+	//std::cout << "Daughter 0 type: " << typeid(*cand1).name() << std::endl;
+
+	
         //Gen match
         if(doGenMatching_)
         {
@@ -944,6 +966,8 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
             }
         }
 
+
+	std::cout<<"CHECK-1"<<std::endl;
 /*
         double pxd1 = d1->px();
         double pyd1 = d1->py();
@@ -964,6 +988,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
                 
         if(pt2/pt1 < trkPtAsymMin_ || pt1/pt2 < trkPtAsymMin_) continue;
 
+	std::cout<<"CHECK-2"<<std::endl;
         //momentum
         p1 = d1->p();
         p2 = d2->p();
@@ -971,6 +996,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         if(p1 < trkPMin_ || p2 < trkPMin_) continue;
         if((p1+p2) < trkPSumMin_) continue;
 
+	std::cout<<"CHECK-3"<<std::endl;
         //eta
         eta1 = d1->eta();
         eta2 = d2->eta();
@@ -978,6 +1004,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         if(fabs(eta1) > trkEtaMax_ || fabs(eta2) > trkEtaMax_) continue;
         if(fabs(eta1-eta2) > trkEtaDiffMax_) continue;
 
+	std::cout<<"CHECK-4"<<std::endl;
         //phi
         phi1 = d1->phi();
         phi2 = d2->phi();
@@ -1003,7 +1030,10 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
 
         if(VtxProb < candVtxProbMin_) continue;       
 
-        //PAngle
+
+	
+	
+	//PAngle
         TVector3 ptosvec(secvx-bestvx,secvy-bestvy,secvz-bestvz);
         TVector3 secvec(px,py,pz);
         
@@ -1012,11 +1042,13 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         
         agl = cos(secvec.Angle(ptosvec));
         agl_abs = secvec.Angle(ptosvec);
-        if(agl_abs > cand3DPointingAngleMax_) continue;
+        //if(agl_abs > cand3DPointingAngleMax_) continue;
 
+
+	
         agl2D = cos(secvec2D.Angle(ptosvec2D));
         agl2D_abs = secvec2D.Angle(ptosvec2D);
-        if(agl2D_abs > cand2DPointingAngleMax_) continue;
+        //if(agl2D_abs > cand2DPointingAngleMax_) continue;
         
         //Decay length 3D
         typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
@@ -1031,7 +1063,9 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         
         dlos = dl/dlerror;
         if(dlos < cand3DDecayLengthSigMin_ || dlos > 1000.) continue;
- 
+
+	
+	
         //Decay length 2D
         SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
         SVector6 v2(trk.vertexCovariance(0,0), trk.vertexCovariance(0,1),trk.vertexCovariance(1,1),0,0,0);
@@ -1051,21 +1085,42 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
         double dca3D = dl*sin(agl_abs);
         if(dca3D < cand3DDCAMin_ || dca3D > cand3DDCAMax_) continue;
 
+	
+	
         double dca2D = dl2D*sin(agl2D_abs);
         if(dca2D < cand2DDCAMin_ || dca2D > cand2DDCAMax_) continue;
 
+
         //trk info
-        auto dau1 = d1->get<reco::TrackRef>();
-	if (dau1.isNull() || !dau1.isAvailable()) continue;
+        //auto dau1 = d1->get<reco::TrackRef>();
+	//if (dau1.isNull() || !dau1.isAvailable()) continue;
+
+	//auto dau1 = d1->get<pat::PackedCandidate>();
+	//if (!dau1) continue;
+
+	//const reco::Candidate* packed1 = d1->daughter(0);
+	const pat::PackedCandidate* dau1 = dynamic_cast<const pat::PackedCandidate*>(d1);
+		
+	const reco::Track& pseudoTrk1 = dau1->pseudoTrack();
+	float trkChi1 = pseudoTrk1.normalizedChi2();
+	float ptErr1 = pseudoTrk1.ptError();
+	int nhit1 = pseudoTrk1.hitPattern().numberOfValidHits();
+	bool trkquality1 = pseudoTrk1.quality(reco::TrackBase::highPurity);
+
+
+	
+	std::cout<<"CHECK-5"<<std::endl;
+
 
 	if(!twoLayerDecay_)
         {
             //trk quality
-            trkquality1 = dau1->quality(reco::TrackBase::highPurity);
-            if(trkHighPurity_ && !trkquality1) continue;
+            //trkquality1 = dau1->quality(reco::TrackBase::highPurity);
+            //if(trkHighPurity_ && !trkquality1) continue;
+	  if(!trkquality1) continue;
             
             //trk dEdx
-            H2dedx1 = -999.9;
+            /*H2dedx1 = -999.9;
             T4dedx1 = -999.9;
             if(usePID_)
             {
@@ -1082,48 +1137,122 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
                   const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
                   T4dedx1 = dEdxTrack[dau1].dEdx();
                }
-            }
-            
+	       }*/
+
+	  H2dedx1 = -999.9;
+	  T4dedx1 = -999.9;
+	  
+	  if (usePID_) {
+	    // Find index of dau1 in tracks
+	    size_t idx1 = std::distance(tracks->begin(), std::find_if(
+								      tracks->begin(), tracks->end(),
+								      [&](const pat::PackedCandidate& c) { return &c == dau1; }
+								      ));
+	    
+	    edm::Ptr<pat::PackedCandidate> candPtr1(tracks, idx1);
+	    
+	    if (dEdxHandle1.isValid()) {
+	      const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
+	      H2dedx1 = dEdxTrack[candPtr1].dEdx();
+	      
+	      if (H2dedx1 > (2.8 / pow(pt1 * cosh(eta1), 0.4) + 0.2) &&
+		  H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.9) + 1.8) &&
+		  H2dedx1 > (2.8 / pow(0.75, 0.4) + 0.2)) {
+		isKaonD1 = true;
+		isPionD1 = false;
+	      }
+	      if ((H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.4) + 0.2) ||
+		   H2dedx1 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
+		  H2dedx1 > 0) {
+		isPionD1 = true;
+		isKaonD1 = false;
+	      }
+	    }
+	    
+	    if (dEdxHandle2.isValid()) {
+	      const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle2.product();
+	      T4dedx1 = dEdxTrack[candPtr1].dEdx();
+	    }
+	  }
+	  
+
+
             //track Chi2
-            trkChi1 = dau1->normalizedChi2();
+            //trkChi1 = dau1->normalizedChi2();
             
             //track pT error
-            ptErr1 = dau1->ptError();
+            //ptErr1 = dau1->ptError();
             if(ptErr1/dau1->pt() > trkPtErrMax_) continue;
     
             //vertexCovariance 00-xError 11-y 22-z
             secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
            
             //trkNHits
-            nhit1 = dau1->numberOfValidHits();
+            //nhit1 = dau1->numberOfValidHits();
             if(nhit1 < trkNHitMin_) continue;
+	    
 
-
-
+	    std::cout<<"CHECK-6"<<std::endl;
 	    
             //DCA
-            math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-            
-            double dzbest1 = dau1->dz(bestvtx);
-            double dxybest1 = dau1->dxy(bestvtx);
+
+	    math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
+	    
+	    /*double dzbest1 =-1.0;
+	    double dxybest1 = -1.0;
+	    double dzerror1 = -1.0;
+	    double dxyerror1 = -1.0;
+	    */
+	    
+	    double dzbest1 = dau1->dz(bestvtx);
+	    double dxybest1 = dau1->dxy(bestvtx);
+	    double dzerror1 = std::sqrt(pseudoTrk1.dzError() * pseudoTrk1.dzError() + bestvzError * bestvzError);
+	    double dxyerror1 = std::sqrt(pseudoTrk1.d0Error() * pseudoTrk1.d0Error() + bestvxError * bestvyError);
+	    
+	    dzos1 = dzbest1/dzerror1;
+	    dxyos1 = dxybest1/dxyerror1;
+	  
+
+
+
+	    /*math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
+
+	    double dzbest1 = dau1->dz(bestvtx);
+	    double dxybest1 = dau1->dxy(bestvtx);
             double dzerror1 = sqrt(dau1->dzError()*dau1->dzError()+bestvzError*bestvzError);
             double dxyerror1 = sqrt(dau1->d0Error()*dau1->d0Error()+bestvxError*bestvyError);
             
             dzos1 = dzbest1/dzerror1;
             dxyos1 = dxybest1/dxyerror1;
-        }
-        
-        auto dau2 = d2->get<reco::TrackRef>();
-        if (dau2.isNull() || !dau2.isAvailable()) continue;
+	    */
+
+	}
+
+
+	//const reco::Candidate* packed2 = d2->daughter(1);
+	const pat::PackedCandidate* dau2 = dynamic_cast<const pat::PackedCandidate*>(d2);
+		
+	const reco::Track& pseudoTrk2 = dau2->pseudoTrack();
+	float trkChi2 = pseudoTrk2.normalizedChi2();
+	float ptErr2 = pseudoTrk2.ptError();
+	int nhit2 = pseudoTrk2.hitPattern().numberOfValidHits();
+	bool trkquality2 = pseudoTrk2.quality(reco::TrackBase::highPurity);
+
+	
+        //auto dau2 = d2->get<reco::TrackRef>();
+        //if (dau2.isNull() || !dau2.isAvailable()) continue;
 						    
-        trkquality2 = dau2->quality(reco::TrackBase::highPurity);
-        if(trkHighPurity_ && !trkquality2) continue;
+
+        //trkquality2 = dau2->quality(reco::TrackBase::highPurity);
+        //if(trkHighPurity_ && !trkquality2) continue;
+	if(!trkquality2) continue;
 
         //trk dEdx
         H2dedx2 = -999.9;
         T4dedx2 = -999.9;
-        
-        if(usePID_)
+
+
+        /*if(usePID_)
         {
           if(dEdxHandle1.isValid())
           {
@@ -1141,51 +1270,118 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
 
           if(flavor>0 && (!isPionD1 || !isKaonD2)) continue;
           if(flavor<0 && (!isPionD2 || !isKaonD1)) continue;
-        }
+	  }*/
 
+	H2dedx2 = -999.9;
+	T4dedx2 = -999.9;
+	
+	if (usePID_) {
+	  // Find index of dau2 in tracks
+	  size_t idx2 = std::distance(tracks->begin(), std::find_if(
+								    tracks->begin(), tracks->end(),
+								    [&](const pat::PackedCandidate& c) { return &c == dau2; }
+								    ));
+	  
+	  edm::Ptr<pat::PackedCandidate> candPtr2(tracks, idx2);
+	  
+	  if (dEdxHandle1.isValid()) {
+	    const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
+	    H2dedx2 = dEdxTrack[candPtr2].dEdx();
+	    
+	    if (H2dedx2 > (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) &&
+		H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.9) + 1.8) &&
+		H2dedx2 > (2.8 / pow(0.75, 0.4) + 0.2)) {
+	      isKaonD2 = true;
+	      isPionD2 = false;
+	    }
+	    if ((H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) ||
+		 H2dedx2 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
+		H2dedx2 > 0) {
+	      isPionD2 = true;
+	      isKaonD2 = false;
+	    }
+	  }
+	  
+	  if (dEdxHandle2.isValid()) {
+	    const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle2.product();
+	    T4dedx2 = dEdxTrack[candPtr2].dEdx();
+	  }
+	  
+	  if (flavor > 0 && (!isPionD1 || !isKaonD2)) continue;
+	  if (flavor < 0 && (!isPionD2 || !isKaonD1)) continue;
+	}
+	
+	
         //track Chi2
-        trkChi2 = dau2->normalizedChi2();
+        //trkChi2 = dau2->normalizedChi2();
         
         //track pT error
-        ptErr2 = dau2->ptError();
+        //ptErr2 = dau2->ptError();
         if(ptErr2/dau2->pt() > trkPtErrMax_) continue;
 
         //vertexCovariance 00-xError 11-y 22-z
         secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
         
+	
         //trkNHits
-        nhit2 = dau2->numberOfValidHits();
+        //nhit2 = dau2->numberOfValidHits();
         if(nhit2 < trkNHitMin_) continue;
-        
+
+	
         //DCA
         math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
         
         double dzbest2 = dau2->dz(bestvtx);
         double dxybest2 = dau2->dxy(bestvtx);
-        double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
-        double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
+        //double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
+        //double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
+	double dzerror2 = std::sqrt(pseudoTrk2.dzError() * pseudoTrk2.dzError() + bestvzError * bestvzError);
+	double dxyerror2 = std::sqrt(pseudoTrk2.d0Error() * pseudoTrk2.d0Error() + bestvxError * bestvyError);
         
         dzos2 = dzbest2/dzerror2;
         dxyos2 = dxybest2/dxyerror2;
         
         if(threeProngDecay_)
         {
-          auto dau3 = d3->get<reco::TrackRef>();
-	  if (dau3.isNull() || !dau3.isAvailable()) continue;
-						      
-          trkquality3 = dau3->quality(reco::TrackBase::highPurity);
-          if(trkHighPurity_ && !trkquality3) continue;
-          trkChi3 = dau3->normalizedChi2();
-          ptErr3 = dau3->ptError();
+	  //const reco::Candidate* packed3 = d3->daughter(2);
+	  const pat::PackedCandidate* dau3 = dynamic_cast<const pat::PackedCandidate*>(d3);
+
+
+	  /*float trkChi3 = -999;
+	float ptErr3 = -999;
+	int nhit3 = -1;
+	bool trkquality3 = false;
+	  */
+		
+	const reco::Track& pseudoTrk3 = dau3->pseudoTrack();
+	float trkChi3 = pseudoTrk3.normalizedChi2();
+	float ptErr3 = pseudoTrk3.ptError();
+	int nhit3 = pseudoTrk3.hitPattern().numberOfValidHits();
+	bool trkquality3 = pseudoTrk3.quality(reco::TrackBase::highPurity);
+
+	
+	//auto dau3 = d3->get<reco::TrackRef>();
+	//if (dau3.isNull() || !dau3.isAvailable()) continue;
+
+
+	//trkquality3 = dau3->quality(reco::TrackBase::highPurity);
+	//if(trkHighPurity_ && !trkquality3) continue;
+	  if(!trkquality3) continue;
+          //trkChi3 = dau3->normalizedChi2();
+          //ptErr3 = dau3->ptError();
           if(ptErr3/dau3->pt() > trkPtErrMax_) continue;
-          nhit3 = dau3->numberOfValidHits();
+          //nhit3 = dau3->numberOfValidHits();
           if(nhit3 < trkNHitMin_) continue;
 
           double dzbest3 = dau3->dz(bestvtx);
           double dxybest3 = dau3->dxy(bestvtx);
-          double dzerror3 = sqrt(dau3->dzError()*dau3->dzError()+bestvzError*bestvzError);
-          double dxyerror3 = sqrt(dau3->d0Error()*dau3->d0Error()+bestvxError*bestvyError);
-          dzos3 = dzbest3/dzerror3;
+          //double dzerror3 = sqrt(dau3->dzError()*dau3->dzError()+bestvzError*bestvzError);
+          //double dxyerror3 = sqrt(dau3->d0Error()*dau3->d0Error()+bestvxError*bestvyError);
+
+	  double dzerror3 = std::sqrt(pseudoTrk3.dzError() * pseudoTrk3.dzError() + bestvzError * bestvzError);
+	  double dxyerror3 = std::sqrt(pseudoTrk3.d0Error() * pseudoTrk3.d0Error() + bestvxError * bestvyError);
+	
+	  dzos3 = dzbest3/dzerror3;
           dxyos3 = dxybest3/dxyerror3;
         }
 
@@ -1233,7 +1429,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
             double ddydzSig_seg = 999.;
             
 
-            const int muId1 = muAssocToTrack( dau1, theMuonHandle );
+            /*const int muId1 = muAssocToTrack( dau1, theMuonHandle );
             if( muId1 != -1 )
             {
               const reco::Muon& cand = (*theMuonHandle)[muId1];
@@ -1296,10 +1492,74 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
                 ddxdzSig1_seg_=ddxdzSig_seg;
                 ddydzSig1_seg_=ddydzSig_seg;
               }
-            }
+	      }*/
+
+	    const int muId1 = muAssocToTrack(dau1, theMuonHandle);
+	    if (muId1 != -1) {
+	      const reco::Muon& cand = (*theMuonHandle)[muId1];
+	      nmatchedch1 = cand.numberOfMatches();
+	      nmatchedst1 = cand.numberOfMatchedStations();
+	      
+	      reco::MuonEnergy muenergy = cand.calEnergy();
+	      matchedenergy1 = muenergy.hadMax;
+	      
+	      const std::vector<reco::MuonChamberMatch>& muchmatches = cand.matches();
+	      for (unsigned int ich = 0; ich < muchmatches.size(); ++ich) {
+		x_exp = muchmatches[ich].x;
+		y_exp = muchmatches[ich].y;
+		xerr_exp = muchmatches[ich].xErr;
+		yerr_exp = muchmatches[ich].yErr;
+		dxdz_exp = muchmatches[ich].dXdZ;
+		dydz_exp = muchmatches[ich].dYdZ;
+		dxdzerr_exp = muchmatches[ich].dXdZErr;
+		dydzerr_exp = muchmatches[ich].dYdZErr;
+		
+		const std::vector<reco::MuonSegmentMatch>& musegmatches = muchmatches[ich].segmentMatches;
+		if (musegmatches.empty()) continue;
+		
+		for (unsigned int jseg = 0; jseg < musegmatches.size(); ++jseg) {
+		  x_seg = musegmatches[jseg].x;
+		  y_seg = musegmatches[jseg].y;
+		  xerr_seg = musegmatches[jseg].xErr;
+		  yerr_seg = musegmatches[jseg].yErr;
+		  dxdz_seg = musegmatches[jseg].dXdZ;
+		  dydz_seg = musegmatches[jseg].dYdZ;
+		  dxdzerr_seg = musegmatches[jseg].dXdZErr;
+		  dydzerr_seg = musegmatches[jseg].dYdZErr;
+		  
+		  const double dr = std::hypot(x_seg - x_exp, y_seg - y_exp);
+		  const double dr_cut = std::hypot(dx_seg, dy_seg);
+		  
+		  if (dr < dr_cut) {
+		    dx_seg = x_seg - x_exp;
+		    dy_seg = y_seg - y_exp;
+		    dxerr_seg = std::sqrt(xerr_seg * xerr_seg + xerr_exp * xerr_exp);
+		    dyerr_seg = std::sqrt(yerr_seg * yerr_seg + yerr_exp * yerr_exp);
+		    dxSig_seg = dx_seg / dxerr_seg;
+		    dySig_seg = dy_seg / dyerr_seg;
+		    ddxdz_seg = dxdz_seg - dxdz_exp;
+		    ddydz_seg = dydz_seg - dydz_exp;
+		    ddxdzerr_seg = std::sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+		    ddydzerr_seg = std::sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+		    ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
+		    ddydzSig_seg = ddydz_seg / ddydzerr_seg;
+		  }
+		}
+		
+		dx1_seg_ = dx_seg;
+		dy1_seg_ = dy_seg;
+		dxSig1_seg_ = dxSig_seg;
+		dySig1_seg_ = dySig_seg;
+		ddxdz1_seg_ = ddxdz_seg;
+		ddydz1_seg_ = ddydz_seg;
+		ddxdzSig1_seg_ = ddxdzSig_seg;
+		ddydzSig1_seg_ = ddydzSig_seg;
+	      }
+	    }
+
                 
 
-            const int muId2 = muAssocToTrack( dau2, theMuonHandle );
+            /*const int muId2 = muAssocToTrack( dau2, theMuonHandle );
             if( muId2 != -1 )
             {
               const reco::Muon& cand = (*theMuonHandle)[muId2];                
@@ -1362,7 +1622,72 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
                 ddxdzSig2_seg_=ddxdzSig_seg;
                 ddydzSig2_seg_=ddydzSig_seg;
               }
-            }
+	      }*/
+
+	    const int muId2 = muAssocToTrack(dau2, theMuonHandle);
+	    if (muId2 != -1) {
+	      const reco::Muon& cand = (*theMuonHandle)[muId2];
+	      
+	      nmatchedch2 = cand.numberOfMatches();
+	      nmatchedst2 = cand.numberOfMatchedStations();
+	      
+	      reco::MuonEnergy muenergy = cand.calEnergy();
+	      matchedenergy2 = muenergy.hadMax;
+	      
+	      const std::vector<reco::MuonChamberMatch>& muchmatches = cand.matches();
+	      for (unsigned int ich = 0; ich < muchmatches.size(); ++ich) {
+		x_exp = muchmatches[ich].x;
+		y_exp = muchmatches[ich].y;
+		xerr_exp = muchmatches[ich].xErr;
+		yerr_exp = muchmatches[ich].yErr;
+		dxdz_exp = muchmatches[ich].dXdZ;
+		dydz_exp = muchmatches[ich].dYdZ;
+		dxdzerr_exp = muchmatches[ich].dXdZErr;
+		dydzerr_exp = muchmatches[ich].dYdZErr;
+		
+		const std::vector<reco::MuonSegmentMatch>& musegmatches = muchmatches[ich].segmentMatches;
+		if (musegmatches.empty()) continue;
+		
+		for (unsigned int jseg = 0; jseg < musegmatches.size(); ++jseg) {
+		  x_seg = musegmatches[jseg].x;
+		  y_seg = musegmatches[jseg].y;
+		  xerr_seg = musegmatches[jseg].xErr;
+		  yerr_seg = musegmatches[jseg].yErr;
+		  dxdz_seg = musegmatches[jseg].dXdZ;
+		  dydz_seg = musegmatches[jseg].dYdZ;
+		  dxdzerr_seg = musegmatches[jseg].dXdZErr;
+		  dydzerr_seg = musegmatches[jseg].dYdZErr;
+		  
+		  const double dr = std::hypot(x_seg - x_exp, y_seg - y_exp);
+		  const double dr_cut = std::hypot(dx_seg, dy_seg);
+		  
+		  if (dr < dr_cut) {
+		    dx_seg = x_seg - x_exp;
+		    dy_seg = y_seg - y_exp;
+		    dxerr_seg = std::sqrt(xerr_seg * xerr_seg + xerr_exp * xerr_exp);
+		    dyerr_seg = std::sqrt(yerr_seg * yerr_seg + yerr_exp * yerr_exp);
+		    dxSig_seg = dx_seg / dxerr_seg;
+		    dySig_seg = dy_seg / dyerr_seg;
+		    ddxdz_seg = dxdz_seg - dxdz_exp;
+		    ddydz_seg = dydz_seg - dydz_exp;
+		    ddxdzerr_seg = std::sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+		    ddydzerr_seg = std::sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+		    ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
+		    ddydzSig_seg = ddydz_seg / ddydzerr_seg;
+		  }
+		}
+		
+		dx2_seg_ = dx_seg;
+		dy2_seg_ = dy_seg;
+		dxSig2_seg_ = dxSig_seg;
+		dySig2_seg_ = dySig_seg;
+		ddxdz2_seg_ = ddxdz_seg;
+		ddydz2_seg_ = ddydz_seg;
+		ddxdzSig2_seg_ = ddxdzSig_seg;
+		ddydzSig2_seg_ = ddydzSig_seg;
+	      }
+	    }
+	        
         }
         
         if(twoLayerDecay_)
@@ -1667,7 +1992,7 @@ VertexCompositeSelector::GetMVACut(double y, double pt)
   return mvacut;
 }
 
-int VertexCompositeSelector::
+/*int VertexCompositeSelector::
 muAssocToTrack( const reco::TrackRef& trackref,
                 const edm::Handle<reco::MuonCollection>& muonh) const {
   auto muon = std::find_if(muonh->cbegin(),muonh->cend(),
@@ -1676,7 +2001,27 @@ muAssocToTrack( const reco::TrackRef& trackref,
                                       m.track() == trackref    );
                            });
   return ( muon != muonh->cend() ? std::distance(muonh->cbegin(),muon) : -1 );
+  }*/
+
+int VertexCompositeSelector::
+muAssocToTrack(const pat::PackedCandidate* cand,
+               const edm::Handle<reco::MuonCollection>& muonh) const {
+  if (!cand || !cand->hasTrackDetails()) return -1;
+
+  const reco::Track& trk = cand->pseudoTrack();
+
+  auto muon = std::find_if(muonh->cbegin(), muonh->cend(),
+                           [&](const reco::Muon& m) {
+                             return (m.track().isNonnull() &&
+                                     m.track()->charge() == trk.charge() &&
+                                     std::abs(m.track()->pt() - trk.pt()) / trk.pt() < 0.05 &&
+                                     deltaR(m.track()->eta(), m.track()->phi(),
+                                            trk.eta(), trk.phi()) < 0.02);
+                           });
+
+  return (muon != muonh->cend() ? std::distance(muonh->cbegin(), muon) : -1);
 }
+
 
 // ------------ method called once each job just before starting event
 //loop  ------------
