@@ -424,12 +424,14 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
                 double mtD2 = mD2 + ptD2;
                 if (pzD2 > sinh(dRapidityCut_) * sinh(dRapidityCut_) * mtD2) continue;
 		
-		
-                selectedTkhidxSet.emplace_back(tk1idx, tk2idx, tk3idx, perm3 + p);
+		        selectedTkhidxSet.push_back(TrackSelected(tk1_hindex,tk2_hindex,tk3_hindex, perm3 + p));
+                //selectedTkhidxSet.emplace_back(tk1idx, tk2idx, tk3idx, perm3 + p);
+			  continue;
 	      }
 	    }
 	  }
 	}
+	std::cout<<"TkCombinationPermutation, selectedTkhidxSet.size: "<<selectedTkhidxSet.size()<<std::endl;
 	return;
 }
 
