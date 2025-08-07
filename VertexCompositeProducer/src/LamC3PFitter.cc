@@ -380,9 +380,9 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 						  
 						  ){
   
-  //int tk1_hindex = -1;
-  //int tk2_hindex = -1;
-  //int tk3_hindex = -1;
+  int tk1_hindex = -1;
+  int tk2_hindex = -1;
+  int tk3_hindex = -1;
 
 	mass_window[0] = 2.1; //Check!!!
 	mass_window[1] = 2.5; //Check!!!
@@ -395,17 +395,20 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 	
 	for (int tk1idx = 0; tk1idx < number_NeededTrack; tk1idx++) {
 	  const TrackXYZP2& tr1 = lstXYZP2[tk1idx];
+	  tk1_hindex = tr1.index;
 	  int perm1 = tr1.q;
 	  
 	  for (int tk2idx = tk1idx + 1; tk2idx < number_NeededTrack; tk2idx++) {
 	    const TrackXYZP2& tr2 = lstXYZP2[tk2idx];
-	    int perm2 = (perm1 << 1) + tr2.q;
+	    tk2_hindex = tr2.index;
+		int perm2 = (perm1 << 1) + tr2.q;
 	    P3 p12(tr2);
 	    p12 += tr1;
 	    
 	    for (int tk3idx = tk2idx + 1; tk3idx < number_NeededTrack; tk3idx++) {
 	      const TrackXYZP2& tr3 = lstXYZP2[tk3idx];
-	      int perm3 = (perm2 << 1) + tr3.q;
+	      tk3_hindex = tr3.index;
+		  int perm3 = (perm2 << 1) + tr3.q;
 	      if (perm3 == 0 || perm3 == 14) continue;
 	      
 	      P3 pD(tr3);
