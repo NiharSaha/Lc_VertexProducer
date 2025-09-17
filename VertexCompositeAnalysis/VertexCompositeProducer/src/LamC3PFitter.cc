@@ -221,11 +221,6 @@ static const int PDGID_in_permutation[16][3] = {
 void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 
-  if (iEvent.id().event() == 47094305){
-    std::cout << "--> Found event: 47094305 and SKIPPING <--" << std::endl;
-    return;
-  }
-
   using namespace std;
   using namespace edm;
   using namespace reco;
@@ -253,17 +248,6 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
   auto bFieldHandle = iSetup.getHandle(bField_esToken_);
   magField = bFieldHandle.product();
 
-  // Get primary vertex or fallback to beamspot
-  //reco::Vertex thePrimaryV;
-  //bool isVtxPV = false;
-  
-  /*if (!vertexHandle->empty() && !vertexHandle->begin()->isFake() && vertexHandle->begin()->tracksSize() >= 2) {
-    thePrimaryV = vertexHandle->front();
-    //isVtxPV = true;
-  } else {
-    thePrimaryV = reco::Vertex(beamSpotHandle->position(), reco::Vertex::Error(), 1, 1, 1);
-    //isVtxPV = false;
-    }*/
 
   //bool isVtxPV = 0;
   double xVtx = -99999.0;
@@ -275,7 +259,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
   double dzvtx = -999, dxyvtx = -999;
   double dzerror = -999, dxyerror = -999;
   double trk_chi2 = -999;
-  //int count = 0;
+
 
 
   
@@ -312,17 +296,17 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   std::vector<pat::PackedCandidate> input_tracks;
   std::vector<pat::PackedCandidate> input_tracks_passed;
-  //std::vector<edm::Ptr<pat::PackedCandidate>> input_tracks;
+
 
   input_tracks = *packedHandle;
   
-  //std::cout<<"packedHandle size="<<packedHandle->size()<<std::endl;
+
     int i_tk=0;
     int passedTrk=0;
 
     std::vector<bool> isNeededTrack;
-    //for (size_t i = 0; i < packedHandle->size(); ++i) {
 
+    //for (size_t i = 0; i < packedHandle->size(); ++i) {
     for (std::vector<pat::PackedCandidate>::const_iterator tk_it=input_tracks.begin(); tk_it != input_tracks.end(); tk_it++) {
 
       i_tk++;
@@ -332,16 +316,11 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	std::cout<<"ERROR: number of tracks exceeds the size of array!"<<std::endl;
 	break;
       }
-    //const auto& cand = (*packedHandle)[i];    
-    //edm::Ptr<pat::PackedCandidate> ptr(packedHandle, i);
-    //const auto &cand = *ptr;
-
+    
       isNeededTrack.push_back(false);
 
     // Make sure the candidate is charged and has tracking information    
-    //if (cand.charge() == 0 && cand.hasTrackDetails()== 0) continue;
-    //if (cand.pt() < tkPtCut || fabs(cand.eta()) > tkEtaCut) continue;
-
+    
       if (!tk_it->hasTrackDetails()) continue;
       if (abs(tk_it->charge()) != 1) continue;
       if (tk_it->pt() < tkPtCut) continue;
@@ -384,9 +363,8 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
     input_tracks_passed.push_back(*tk_it);
 
     
-    //lst.push_back(Track(cand.pt(), cand.eta(), cand.phi(), cand.charge()+1, i));
+    
     //lst.push_back(Track(cand.pt(), cand.eta(), cand.phi(), cand.charge()+1, input_tracks.begin()));
-
 
     isNeededTrack[tk_it-input_tracks.begin()] = true;
     
@@ -406,8 +384,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
     }//-----End track loops
 
     
-    //int n = (int) lst.size();
-    
+    //int n = (int) lst.size();    
     for (int i = 0; i < (int)lst.size(); i ++) {
       TrackXYZP2 tr = lst[i];
       lstXYZP2.push_back(tr);
@@ -611,7 +588,7 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
       std::vector<int> triplet_pdgids;
 
       float tk_sigma;
-      int tk1_charge=0, tk2_charge=0, tk3_charge=0;
+      //int tk1_charge=0, tk2_charge=0, tk3_charge=0;
       int tk1_pdgid=0, tk2_pdgid=0, tk3_pdgid=0;
       
 
@@ -637,15 +614,9 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
 
 
-      pat::CompositeCandidate dau_cand1, dau_cand2, dau_cand3;
-       
-      /*dau_cand1 = input_tracks[idx1];
-      dau_cand2 = input_tracks[idx2];
-      dau_cand3 = input_tracks[idx3];
-      */
+
       reco::TransientTrack tkTT1(input_tracks[selectedTkhidxSet[i].index_tk1].pseudoTrack(), &(*field) );
       //reco::TransientTrack tkTT1(cand1.pseudoTrack(), &(*field) );
-      //reco::TransientTrack tkTT1(trackFromCand1, &(*field) );
       if (tkTT1.isValid())
 	{
 	  tk_mass = Mass_in_permutation[selectedTkhidxSet[i].permutation_number][0];
@@ -657,7 +628,6 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
       reco::TransientTrack tkTT2(input_tracks[selectedTkhidxSet[i].index_tk2].pseudoTrack(), &(*field) );
       //reco::TransientTrack tkTT2(cand2.pseudoTrack(), &(*field) );
-      //reco::TransientTrack tkTT2(trackFromCand2, &(*field));
       if (tkTT2.isValid())
 	{
 
@@ -671,7 +641,6 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
       reco::TransientTrack tkTT3(input_tracks[selectedTkhidxSet[i].index_tk3].pseudoTrack(), &(*field) );
       //reco::TransientTrack tkTT3(cand3.pseudoTrack(), &(*field) );
-      //reco::TransientTrack tkTT3(trackFromCand3, &(*field));
       if (tkTT3.isValid())
 	{
 	  tk_mass   = Mass_in_permutation[selectedTkhidxSet[i].permutation_number][2];
@@ -737,11 +706,8 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 						LamC3Pcand->currentState().globalMomentum().z()
 						);
       
-      float LamC3P_TotalE = sqrt(LamC3P_TotalP.mag2() + pow(invmass, 2));
-      
-      
-
-      
+      //float LamC3P_TotalE = sqrt(LamC3P_TotalP.mag2() + pow(invmass, 2));
+        
       /*const reco::Particle::LorentzVector lamCP4(LamC3Pcand->currentState().globalMomentum().x(),
                                            LamC3Pcand->currentState().globalMomentum().y(),
                                            LamC3Pcand->currentState().globalMomentum().z(),
@@ -830,13 +796,6 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
         cur3DIP = (a3d.distance(VertexState(vertexPosition, vertexPositionErr), VertexState(refPoint, refPointErr)));
 
 
-	//Get DCA and its error!!!
-	//DCAResult dcaRes = calculate3TrackDCA(tkTT1, tkTT2, tkTT3);
-	//double DCA = dcaRes.dca;
-	//double DCAError = dcaRes.dcaError;
-	
-
-
 
 	int lamCCharge = cand1.charge() + cand2.charge() + cand3.charge();
 	if (abs(lamCCharge) != 1) continue;  
@@ -862,8 +821,7 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
       theLamC3P.addDaughter(cand2);
       theLamC3P.addDaughter(cand3);
 
-
-      
+      //Add user variables!      
       theLamC3P.addUserFloat("vtxX", LamC3P_Vtx.x());
       theLamC3P.addUserFloat("vtxY", LamC3P_Vtx.y());
       theLamC3P.addUserFloat("vtxZ", LamC3P_Vtx.z());
@@ -889,7 +847,6 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
         }
       
       //std::cout<<"LamC mass="<<theLamC3P.mass()<<std::endl;
-
       theLamC3Ps.push_back(theLamC3P);
 
 
