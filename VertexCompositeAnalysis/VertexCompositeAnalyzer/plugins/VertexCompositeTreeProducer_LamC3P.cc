@@ -65,7 +65,7 @@
 #include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-#include "Utils.h"
+//#include "Utils.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
@@ -181,10 +181,10 @@ struct CandidateData {
 
 
 
-class VertexCompositeTreeProducer_new : public edm::one::EDAnalyzer<> {
+class VertexCompositeTreeProducer_LamC3P : public edm::one::EDAnalyzer<> {
 	public:
-		explicit VertexCompositeTreeProducer_new(const edm::ParameterSet&);
-		~VertexCompositeTreeProducer_new();
+		explicit VertexCompositeTreeProducer_LamC3P(const edm::ParameterSet&);
+		~VertexCompositeTreeProducer_LamC3P();
 
 		using MVACollection = std::vector<float>;
 
@@ -194,30 +194,28 @@ class VertexCompositeTreeProducer_new : public edm::one::EDAnalyzer<> {
 		virtual void fillRECO(const edm::Event&, const edm::EventSetup&) ;
 		virtual void endJob() ;
 		virtual void initTree();
-  //void genDecayLength(const uint&, const reco::GenParticle&);
+
   void genDecayLength(const uint&, const reco::GenParticle&, CandidateData&);
 
 		// ----------member data ---------------------------
 
 		edm::Service<TFileService> fs;
 
-		//CommonFuncts        Functs;
-
 
 		TTree* VertexCompositeNtuple;
 
-  CandidateData candInfo; 
-  bool   saveTree_;
+                CandidateData candInfo; 
+                bool saveTree_;
 
 		//options
 		bool doRecoNtuple_;
 		bool dogenntuple_;   
-  //bool dogenmatching_;
+
 		bool dogenmatchingtof_;
 		bool hasswap_;
 		bool decayingen_;
-  bool threeProngDecay_;
-  int PID_;
+                bool threeProngDecay_;
+                int PID_;
 		int PID_dau1_;
 		int PID_dau2_;
 		int PID_dau3_;
@@ -230,8 +228,8 @@ class VertexCompositeTreeProducer_new : public edm::one::EDAnalyzer<> {
 
 		//tree branches
 		//event info
-  int   centMin_;
-  int   centMax_;
+                int   centMin_;
+                int centMax_;
 		int centrality;
 		int Ntrkoffline;
 		int Npixel;
@@ -457,11 +455,9 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
     data.iddau3.resize(newSize);
 }
 
-
-
-
   
-                //vector for gen match                                                                                              
+                //vector for gen match
+  
                 vector< vector<double> > *pVect;
                 vector<double> *Dvector1;
                 vector<double> *Dvector2;
@@ -472,11 +468,11 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
 		
 		bool isSkimMVA_;
 		bool isCentrality_;
-  //bool isData_cent_;
-  //bool isMC_cent_;
+                //bool isData_cent_;
+                //bool isMC_cent_;
 		bool doGenNtuple_;
-  bool useAnyMVA_;
-  bool doGenMatching_;
+                bool useAnyMVA_;
+                bool doGenMatching_;
 		bool decayInGen_;
 
 		edm::Handle<int> cbin_;
@@ -485,10 +481,10 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
 		edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
 		edm::EDGetTokenT<std::vector<pat::PackedCandidate>> tok_generalTrk_;
 		edm::EDGetTokenT<pat::CompositeCandidateCollection> patCompositeCandidateCollection_Token_;
-  //edm::EDGetTokenT<MVACollection> MVAValues_Token_;
+                //edm::EDGetTokenT<MVACollection> MVAValues_Token_;
 
-  //edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
-  //edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
+                //edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
+                //edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
 		edm::EDGetTokenT<reco::GenParticleCollection> tok_genParticle_;
 
 		edm::EDGetTokenT<int> tok_centBinLabel_;
@@ -502,7 +498,7 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
 };
 
 
-VertexCompositeTreeProducer_new::VertexCompositeTreeProducer_new(const edm::ParameterSet& iConfig)
+VertexCompositeTreeProducer_LamC3P::VertexCompositeTreeProducer_LamC3P(const edm::ParameterSet& iConfig)
 
 {
 	//options
@@ -564,7 +560,7 @@ VertexCompositeTreeProducer_new::VertexCompositeTreeProducer_new(const edm::Para
 }
 
 
-VertexCompositeTreeProducer_new::~VertexCompositeTreeProducer_new()
+VertexCompositeTreeProducer_LamC3P::~VertexCompositeTreeProducer_LamC3P()
 {
 
 	// do anything here that needs to be done at desctruction time
@@ -579,7 +575,7 @@ VertexCompositeTreeProducer_new::~VertexCompositeTreeProducer_new()
 
 // ------------ method called to for each event  ------------
 void
-VertexCompositeTreeProducer_new::analyze(const edm::Event& iEvent, const edm::EventSetup&
+VertexCompositeTreeProducer_LamC3P::analyze(const edm::Event& iEvent, const edm::EventSetup&
 		iSetup)
 {
 
@@ -595,7 +591,7 @@ VertexCompositeTreeProducer_new::analyze(const edm::Event& iEvent, const edm::Ev
   if(saveTree_) VertexCompositeNtuple->Fill();
 }
 
-void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void VertexCompositeTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   //std::cout << "[DEBUG] useAnyMVA_ = " << useAnyMVA_ << "  "<<"doGenMatching_ = "<< doGenMatching_<<std::endl;
@@ -609,26 +605,8 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	edm::Handle<reco::VertexCollection> vertices;
 	iEvent.getByToken(tok_offlinePV_,vertices);
 
-	/*if (!vertices.isValid() || vertices->empty()) {
-	  edm::LogWarning("LamC3PAna") << "No primary vertices in this event"<< iEvent.id();
-	  return; // safely skip this event
-	  }*/
-
 	edm::Handle<reco::BeamSpot> beamSpotHandle;
 	iEvent.getByToken(bsLabel_, beamSpotHandle);
-
-	/*if (!beamSpotHandle.isValid()) {
-	  edm::LogWarning("LamC3PAna") << "No beam spot in this event"<< iEvent.id();
-	  return;
-	  }*/
-
-	/*edm::Handle<pat::PackedCandidateCollection> tracks;
-	if (!tracks.isValid() || tracks->empty()) {
-	  edm::LogWarning("LamC3PAna") << "No general tracks in this event!";
-	  return;
-	}
-	iEvent.getByToken(tok_generalTrk_, tracks);
-	*/
 	
 	edm::Handle<pat::CompositeCandidateCollection> lamC3Pcandidates;
 	iEvent.getByToken(patCompositeCandidateCollection_Token_,lamC3Pcandidates);
@@ -696,12 +674,11 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 		centrality = (cbin.isValid() ? *cbin : -1);
 		//if(isData_cent_){centrality = (cbin.isValid() ? *cbin : -1);}
 		//if(isMC_cent_){centrality = getHiBinFromhiHF(HFsumET);}
-
 		//cout<<"isMC_cent_="<<isMC_cent_<<"isData_cent_="<<isData_cent_<<endl;
 	}
 	
 	//if(centrality!=-1 && (centrality >= centMax_ || centrality < centMin_)) return;
-	//std::cout<<"[TTree] isCentrality: "<< isCentrality_<<"   Centrality from TTree : "<<centrality<<std::endl;
+
 	
 	//best vertex
 	BSx=-999.9; BSy=-999.9; BSz=-999.9;
@@ -749,32 +726,18 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	    BSdydz   = beamSpot.dydz();
 
 
-	    //Declare a single object of struct::CandidateData
-	    //CandidateData candInfo;
- 
-
 	    //RECO Candidate info
-	candSize = lamC3Pcandidates_->size();
-	//std::cout << " Lc candidates in tree producer" <<candSize<< std::endl;
+	    candSize = lamC3Pcandidates_->size();	
+	    //Resize the vectors
+	    manageVectorsSize(candInfo, candSize);
 
-	/*if (candSize >= MAXCAN){
-	  std::cout << "Warning: candSize (" << candSize << ") exceeds MAXCAND (" << MAXCAN << "). Data will be truncated." << std::endl;
-	  
-	  candSize = MAXCAN;
-	  }*/
-	
-	//Resize the vectors
-	manageVectorsSize(candInfo, candSize);
+	    
+	    for(int it=0; it<candSize; ++it){
 
-	
-	for(int it=0; it<candSize; ++it){
-
-	  //if (candSize >= MAXCAN) break;
+	      //if (candSize >= MAXCAN) break;
 	  
-	  
-	  //std::cout<<"Getting candidate"<<std::endl;
 	  const pat::CompositeCandidate & trk = (*lamC3Pcandidates_)[it];
-	  //std::cout<<"Got candidate"<<std::endl;
+
 
 	  double secvz=-999.9, secvx=-999.9, secvy=-999.9;
 	  secvz = trk.userFloat("vtxZ"); secvx = trk.userFloat("vtxX"); secvy = trk.userFloat("vtxY");
@@ -785,7 +748,7 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	  bestvxError = trk.userFloat("xVtxError");
 	  bestvyError = trk.userFloat("yVtxError");
 	  
-	  //std::cout<<"CHECK-1"<<" for event "<<iEvent.id().event()<<std::endl;
+
 	  reco::Vertex::CovarianceMatrix sec_covariance;
 	  for (int i = 0; i < 3; i++)
 	    {
@@ -798,15 +761,11 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	  vtxYXErr = sec_covariance(1, 0);
 	  vtxXErr = sec_covariance(0, 0);
 	  vtxYErr = sec_covariance(1, 1);
-	  //std::cout<<"CHECK-2"<<" for event "<<iEvent.id().event()<<std::endl;
-	  
-	  
-	  candInfo.eta[it] = trk.eta();
 
+	  	  
+	  candInfo.eta[it] = trk.eta();
 	  candInfo.y[it] = trk.rapidity();
 	  candInfo.pt[it] = trk.pt();
-	  
-
 	  candInfo.phi[it] = trk.phi();
 	  candInfo.flavor[it] = trk.pdgId()/abs(trk.pdgId());
 	  
@@ -824,7 +783,6 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	  }
 	  
 
-
 	  const pat::PackedCandidate* reco_d1 = dynamic_cast<const pat::PackedCandidate*>(trk.daughter(0));
 	  const pat::PackedCandidate* reco_d2 = dynamic_cast<const pat::PackedCandidate*>(trk.daughter(1));
 	  const pat::PackedCandidate* reco_d3 = nullptr;
@@ -833,7 +791,8 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	    reco_d3 = dynamic_cast<const pat::PackedCandidate*>(trk.daughter(2)); 
 	  }
 
-	  //This is very important to assign the charge based on pdgId!!!
+	  //Note: This is very important to assign the charge based on pdgId!!!
+	  //Note: Without this we can't get correct charge assignment based on permutation!!
 	  int reco_d1_charge = TMath::Sign(1, reco_d1->pdgId());
 	  int reco_d2_charge = TMath::Sign(1, reco_d2->pdgId());
 	  int reco_d3_charge = TMath::Sign(1, reco_d3->pdgId());
@@ -841,9 +800,10 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 
 	
 	  
-	  //Gen match
-	  
-	  /*candInfo.idmom_reco[it] = -77;
+	  //Gen-matching!!	  
+	  candInfo.matchGEN[it] = false;
+	  candInfo.isSwap[it] = false;
+	  candInfo.idmom_reco[it] = -77;
 	  candInfo.idd1_reco[it] = -77;
 	  candInfo.idd2_reco[it] = -77;
 	  candInfo.idd3_reco[it] = -77;
@@ -856,11 +816,8 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	  candInfo.iddau1[it] = -999;
 	  candInfo.iddau2[it] = -999;
 	  candInfo.iddau3[it] = -999;
-	  */
-	  //std::cout<<"CHECK-1"<<std::endl;
+	  
 
-	candInfo.matchGEN[it] = false;
-	candInfo.isSwap[it] = false;
 	if(doGenMatching_){
 	    
             if(!genpars.isValid()){
@@ -909,48 +866,20 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 		  };
 		
 
-		//bool matched = false;
 		for(auto &c : gen_combos) {
 		  
-
-		  /*std::cout << "DEBUG: Reco Charges (" << reco_d1_charge << ", " << reco_d2_charge << ", " << reco_d3_charge << ")"
-			    <<"Reco PDG ID ("<< reco_d1->pdgId()<<", "<<reco_d2->pdgId()<<", "<<reco_d3->pdgId()<< ")"
-		  	    << " vs. Gen Charges (" << c.g1->charge() << ", " << c.g2->charge() << ", " << c.g3->charge() << ")" << std::endl;*/
 		  
 		  if(reco_d1_charge!=c.g1->charge() || reco_d2_charge!=c.g2->charge() || reco_d3_charge!=c.g3->charge()) continue; 
-		  //std::cout<<"Charge condition passed!!!"<<std::endl;
-		  
-		  //std::cout<<"Charge conditions passed!!"<<std::endl;
-		    // deltaR and deltaPt checks
-		    //double dR1 = sqrt(pow(reco_d1->eta()-c.g1->eta(),2)+pow(reco_d1->phi()-c.g1->phi(),2));
-		    //if(dR1 >= deltaR_) continue;
-		    //if(fabs((reco_d1->pt()-c.g1->pt())/reco_d1->pt()) >= 0.2) continue;
-
-		    //double dR2 = sqrt(pow(reco_d2->eta()-c.g2->eta(),2)+pow(reco_d2->phi()-c.g2->phi(),2));
-		    //if(dR2 >= deltaR_) continue;
-		    //if(fabs((reco_d2->pt()-c.g2->pt())/reco_d2->pt()) >= 0.2) continue;
-		    
-		    //double dR3 = sqrt(pow(reco_d3->eta()-c.g3->eta(),2)+pow(reco_d3->phi()-c.g3->phi(),2));
-		    //if(dR3 >= deltaR_) continue;
-		    //if(fabs((reco_d3->pt()-c.g3->pt())/reco_d3->pt()) >= 0.2) continue;
-		    
 
 		  double dR1 = reco::deltaR(*reco_d1, *c.g1);
-		  //double dR1 = sqrt(pow(reco_d1->eta()-c.g1->eta(),2)+pow(reco_d1->phi()-c.g1->phi(),2));
 		  if(dR1 >= deltaR_) continue;
 		  if(fabs((reco_d1->pt() - c.g1->pt()) / reco_d1->pt()) >=0.2) continue;
-
 		  double dR2 = reco::deltaR(*reco_d2, *c.g2);
-		  //double dR2 = sqrt(pow(reco_d2->eta()-c.g2->eta(),2)+pow(reco_d2->phi()-c.g2->phi(),2));
 		  if(dR2 >= deltaR_) continue;
 		  if(fabs((reco_d2->pt() - c.g2->pt()) / reco_d2->pt()) >= 0.2) continue;
-
 		  double dR3 = reco::deltaR(*reco_d3, *c.g3);
-		  //double dR3 = sqrt(pow(reco_d3->eta()-c.g3->eta(),2)+pow(reco_d3->phi()-c.g3->phi(),2));
 		  if(dR3 >= deltaR_) continue;
 		  if(fabs((reco_d3->pt() - c.g3->pt()) / reco_d3->pt()) >= 0.2) continue;
-
-		  
 		  
 		  
 		  candInfo.matchGEN[it] = true;
@@ -962,8 +891,6 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 		    candInfo.isSwap[it] = true;
 		  }
 		  
-		  //========================================================================
-
 
             // =======================================================================
             //  vvv  DEFINITIVE DEBUG PRINTOUT FOR MATCHED CANDIDATES  vvv
@@ -992,8 +919,6 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
                       << std::setw(6) << c.g3->pdgId() << ", " << std::setw(3) << c.g3->charge() << ", " << std::fixed << std::setprecision(3) << std::setw(7) << c.g3->pt() << std::endl;
             std::cout << "==========================================================================================" << std::endl;
 
-            // =======================================================================
-
 
 		  if(decayInGen_){
 		    candInfo.iddau1[it] = c.g1->pdgId();
@@ -1009,7 +934,6 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 		    candInfo.y_gen[it] = genLamC.rapidity();
 		    candInfo.phi_gen[it] = genLamC.phi();
 		    candInfo.idmom[it] = genLamC.pdgId();
-
 		
 		    candInfo.idmom_reco[it] = trk.pdgId();                                                                
 		    candInfo.idd1_reco[it] = reco_d1->pdgId();
@@ -1020,22 +944,15 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 		    break;
 		}// End gen combo loop
 
-		if(candInfo.matchGEN[it]) {
-		  break;
-		}
+		if(candInfo.matchGEN[it]) break;
 		
-		//Gen pair loop
-	    
-	    }// End doGenMatching!!
-	
-	    //std::cout<<"End of doGenMatching!!!"<<std::endl;
+			    
+	    }// End genPair
 
-	}
+	}//End doGenMatching!
 
 
 
-
-	  //std::cout<<"CHECK-6"<<" for event "<<iEvent.id().event()<<std::endl;
 	  double pxd1 = reco_d1->px();
 	  double pyd1 = reco_d1->py();
 	  double pzd1 = reco_d1->pz();
@@ -1075,7 +992,7 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 	  
 	  if(threeProngDecay_ )
 	    {
-	      //std::cout<<"CHECK-7"<<" for event "<<iEvent.id().event()<<std::endl;
+
 	      pxd3 = reco_d3->px();
 	      pyd3 = reco_d3->py();
 	      pzd3 = reco_d3->pz();
@@ -1273,7 +1190,7 @@ void VertexCompositeTreeProducer_new::fillRECO(const edm::Event& iEvent, const e
 
 // ------------ method called once each job just before starting event loop  ------------
 void
-VertexCompositeTreeProducer_new::beginJob()
+VertexCompositeTreeProducer_LamC3P::beginJob()
 {
 	TH1D::SetDefaultSumw2();
 
@@ -1287,7 +1204,7 @@ VertexCompositeTreeProducer_new::beginJob()
 }
 
 void 
-VertexCompositeTreeProducer_new::initTree()
+VertexCompositeTreeProducer_LamC3P::initTree()
 { 
 	VertexCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
 
@@ -1417,28 +1334,12 @@ VertexCompositeTreeProducer_new::initTree()
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-VertexCompositeTreeProducer_new::endJob() {
+VertexCompositeTreeProducer_LamC3P::endJob() {
 
 }
 
-/*void
-VertexCompositeTreeProducer_new::genDecayLength(const uint& it, const reco::GenParticle& gCand) {
-	gen_dl[it] = -99.; gen_agl_abs[it] = -99.; gen_dl2D[it] = -99.; gen_agl2D_abs[it] = -99.;
-	if(gCand.numberOfDaughters()==0 || !gCand.daughter(0)) return;
-	const auto& dauVtx = gCand.daughter(0)->vertex();
-	TVector3 ptosvec(dauVtx.X(), dauVtx.Y(), dauVtx.Z());
-	TVector3 secvec(gCand.px(), gCand.py(), gCand.pz());
-	gen_agl_abs[it] = secvec.Angle(ptosvec);
-	gen_dl[it]  = ptosvec.Mag();
-	TVector3 ptosvec2D(dauVtx.X(), dauVtx.Y(), 0.0);
-	TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
-	gen_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-	gen_dl2D[it]  = ptosvec2D.Mag();
-	}*/
 
-
-
-void VertexCompositeTreeProducer_new::genDecayLength(const uint& it, const reco::GenParticle& gCand, CandidateData& candInfo) {
+void VertexCompositeTreeProducer_LamC3P::genDecayLength(const uint& it, const reco::GenParticle& gCand, CandidateData& candInfo) {
  
     candInfo.gen_dl[it] = -99.9;
     candInfo.gen_agl_abs[it] = -99.9;
@@ -1464,4 +1365,4 @@ void VertexCompositeTreeProducer_new::genDecayLength(const uint& it, const reco:
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(VertexCompositeTreeProducer_new);
+DEFINE_FWK_MODULE(VertexCompositeTreeProducer_LamC3P);
