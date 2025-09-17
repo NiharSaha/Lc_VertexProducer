@@ -18,6 +18,7 @@ Producer reads in the previously produced edm file and outputs a root TTree.
 
 
 ## How to run
+```bash
 
 #LXplus, bash, cmssw-el8 apptainer
 
@@ -41,4 +42,5 @@ cd VertexCompositeAnalysis/VertexCompositeProducer/test
 cmsRun Config_LcEdmTTree_Data.py  for Data
 cmsRun Config_LcEdmTTree_MC.py    for MC
 
+```
 
