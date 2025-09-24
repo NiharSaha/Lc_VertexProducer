@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-lamc3pana = cms.EDAnalyzer('VertexCompositeTreeProducer_LamC3P',
+lamc3pana = cms.EDAnalyzer('VCTreeProducer_LamC3P',
   doGenMatching = cms.untracked.bool(False),
   doGenMatchingTOF = cms.untracked.bool(False),
   hasSwap = cms.untracked.bool(False),
