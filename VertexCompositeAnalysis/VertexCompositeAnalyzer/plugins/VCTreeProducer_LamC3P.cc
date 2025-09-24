@@ -181,10 +181,10 @@ struct CandidateData {
 
 
 
-class VertexCompositeTreeProducer_LamC3P : public edm::one::EDAnalyzer<> {
+class VCTreeProducer_LamC3P : public edm::one::EDAnalyzer<> {
 	public:
-		explicit VertexCompositeTreeProducer_LamC3P(const edm::ParameterSet&);
-		~VertexCompositeTreeProducer_LamC3P();
+		explicit VCTreeProducer_LamC3P(const edm::ParameterSet&);
+		~VCTreeProducer_LamC3P();
 
 		using MVACollection = std::vector<float>;
 
@@ -498,7 +498,7 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
 };
 
 
-VertexCompositeTreeProducer_LamC3P::VertexCompositeTreeProducer_LamC3P(const edm::ParameterSet& iConfig)
+VCTreeProducer_LamC3P::VCTreeProducer_LamC3P(const edm::ParameterSet& iConfig)
 
 {
 	//options
@@ -560,7 +560,7 @@ VertexCompositeTreeProducer_LamC3P::VertexCompositeTreeProducer_LamC3P(const edm
 }
 
 
-VertexCompositeTreeProducer_LamC3P::~VertexCompositeTreeProducer_LamC3P()
+VCTreeProducer_LamC3P::~VCTreeProducer_LamC3P()
 {
 
 	// do anything here that needs to be done at desctruction time
@@ -575,7 +575,7 @@ VertexCompositeTreeProducer_LamC3P::~VertexCompositeTreeProducer_LamC3P()
 
 // ------------ method called to for each event  ------------
 void
-VertexCompositeTreeProducer_LamC3P::analyze(const edm::Event& iEvent, const edm::EventSetup&
+VCTreeProducer_LamC3P::analyze(const edm::Event& iEvent, const edm::EventSetup&
 		iSetup)
 {
 
@@ -591,10 +591,8 @@ VertexCompositeTreeProducer_LamC3P::analyze(const edm::Event& iEvent, const edm:
   if(saveTree_) VertexCompositeNtuple->Fill();
 }
 
-void VertexCompositeTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void VCTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-
-  //std::cout << "[DEBUG] useAnyMVA_ = " << useAnyMVA_ << "  "<<"doGenMatching_ = "<< doGenMatching_<<std::endl;
 
 
 #ifdef DEBUG
@@ -624,7 +622,6 @@ void VertexCompositeTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, cons
 	//edm::Handle<MVACollection> mvavalues;
 
 	/*if (useAnyMVA_) {
-	  std::cout<<"TO CHECK!!!!!!!"<<std::endl;
 	  
 	  iEvent.getByToken(MVAValues_Token_,mvavalues);
 	  assert((*mvavalues).size() == lamC3Pcandidates_->size());
@@ -1190,7 +1187,7 @@ void VertexCompositeTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, cons
 
 // ------------ method called once each job just before starting event loop  ------------
 void
-VertexCompositeTreeProducer_LamC3P::beginJob()
+VCTreeProducer_LamC3P::beginJob()
 {
 	TH1D::SetDefaultSumw2();
 
@@ -1204,7 +1201,7 @@ VertexCompositeTreeProducer_LamC3P::beginJob()
 }
 
 void 
-VertexCompositeTreeProducer_LamC3P::initTree()
+VCTreeProducer_LamC3P::initTree()
 { 
 	VertexCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
 
@@ -1334,12 +1331,12 @@ VertexCompositeTreeProducer_LamC3P::initTree()
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-VertexCompositeTreeProducer_LamC3P::endJob() {
+VCTreeProducer_LamC3P::endJob() {
 
 }
 
 
-void VertexCompositeTreeProducer_LamC3P::genDecayLength(const uint& it, const reco::GenParticle& gCand, CandidateData& candInfo) {
+void VCTreeProducer_LamC3P::genDecayLength(const uint& it, const reco::GenParticle& gCand, CandidateData& candInfo) {
  
     candInfo.gen_dl[it] = -99.9;
     candInfo.gen_agl_abs[it] = -99.9;
@@ -1365,4 +1362,4 @@ void VertexCompositeTreeProducer_LamC3P::genDecayLength(const uint& it, const re
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(VertexCompositeTreeProducer_LamC3P);
+DEFINE_FWK_MODULE(VCTreeProducer_LamC3P);

@@ -188,10 +188,10 @@ public:
 
 
 
-class VertexCompositeSelector_LamC3P : public edm::one::EDProducer<> {
+class VCSelector_LamC3P : public edm::one::EDProducer<> {
 public:
-  explicit VertexCompositeSelector_LamC3P(const edm::ParameterSet&);
-  ~VertexCompositeSelector_LamC3P();
+  explicit VCSelector_LamC3P(const edm::ParameterSet&);
+  ~VCSelector_LamC3P();
 
   using MVACollection = std::vector<float>;
 
@@ -452,7 +452,7 @@ private:
 
 
 
-VertexCompositeSelector_LamC3P::VertexCompositeSelector_LamC3P(const edm::ParameterSet& iConfig)
+VCSelector_LamC3P::VCSelector_LamC3P(const edm::ParameterSet& iConfig)
 {
     //options
     twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
@@ -595,7 +595,7 @@ VertexCompositeSelector_LamC3P::VertexCompositeSelector_LamC3P(const edm::Parame
 }
 
 
-VertexCompositeSelector_LamC3P::~VertexCompositeSelector_LamC3P()
+VCSelector_LamC3P::~VCSelector_LamC3P()
 {
  
   // do anything here that needs to be done at desctruction time
@@ -610,7 +610,7 @@ VertexCompositeSelector_LamC3P::~VertexCompositeSelector_LamC3P()
 
 // ------------ method called to for each event  ------------
 void
-VertexCompositeSelector_LamC3P::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+VCSelector_LamC3P::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using std::vector;
     using namespace edm;
@@ -622,7 +622,7 @@ VertexCompositeSelector_LamC3P::produce(edm::Event& iEvent, const edm::EventSetu
     
     if (!patCandidates.isValid())
       {
-	edm::LogError("VertexCompositeSelector_LamC3P") << "Error: patCandidates collection not found!";
+	edm::LogError("VCSelector_LamC3P") << "Error: patCandidates collection not found!";
 	return;
       }
     
@@ -648,7 +648,7 @@ VertexCompositeSelector_LamC3P::produce(edm::Event& iEvent, const edm::EventSetu
 }
 
 void
-VertexCompositeSelector_LamC3P::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSetup)
+VCSelector_LamC3P::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
@@ -704,9 +704,6 @@ VertexCompositeSelector_LamC3P::fillRECO(edm::Event& iEvent, const edm::EventSet
 
     int candSize = LamC3PCandidates_->size();
 
-    /*if (candSize >=MAXCAN){
-      candSize=MAXCAN;
-      }*/
 
     for(int it=0; it<candSize; ++it){
         
@@ -808,8 +805,6 @@ VertexCompositeSelector_LamC3P::fillRECO(edm::Event& iEvent, const edm::EventSet
         }
 
         //vtxChi2
-
-
 
 	
 	//PAngle
@@ -1087,7 +1082,7 @@ VertexCompositeSelector_LamC3P::fillRECO(edm::Event& iEvent, const edm::EventSet
 }
 
 /*double
-VertexCompositeSelector_LamC3P::GetMVACut(double y, double pt)
+VCSelector_LamC3P::GetMVACut(double y, double pt)
 {
   double mvacut = -1.0;
   if(fabs(y)>2.4) return mvacut;
@@ -1105,16 +1100,16 @@ VertexCompositeSelector_LamC3P::GetMVACut(double y, double pt)
 // ------------ method called once each job just before starting event
 
 void
-VertexCompositeSelector_LamC3P::beginJob()
+VCSelector_LamC3P::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event
 
 void 
-VertexCompositeSelector_LamC3P::endJob() {
+VCSelector_LamC3P::endJob() {
 }
 
 //define this as a plug-in
 #include "FWCore/PluginManager/interface/ModuleDef.h"
-DEFINE_FWK_MODULE(VertexCompositeSelector_LamC3P);
+DEFINE_FWK_MODULE(VCSelector_LamC3P);

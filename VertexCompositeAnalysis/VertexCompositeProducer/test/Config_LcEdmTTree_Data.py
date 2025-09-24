@@ -27,10 +27,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 process.TFileService = cms.Service("TFileService",
-    fileName =cms.string('TTreeData_Lc_tkpt1_dpt4_maxcand20k_evt100_Sept17.root'))
+    fileName =cms.string('TTreeData_Lc_tkpt1_dpt4_maxcand20k_evt1000_sept24.root'))
 
 
 # Define the input source
@@ -119,8 +119,6 @@ process.generalLamC3PCandidatesNew.tkPtCut = cms.double(1.0)#checked
 process.generalLamC3PCandidatesNew.alphaCut = cms.double(1.0) #checked
 process.generalLamC3PCandidatesNew.alpha2DCut = cms.double(999.9)
 process.generalLamC3PCandidatesNew.dPtCut = cms.double(4.0) #checked
-#process.generalLamC3PCandidatesNew.mPiKCutMin = cms.double(1.74)
-#process.generalLamC3PCandidatesNew.mPiKCutMax = cms.double(2.00)
 #process.generalLamC3PCandidatesNew.lamCMassCut = cms.double(0.125)
 process.generalLamC3PCandidatesNew.VtxChiProbCut = cms.double(0.010) #checked
 

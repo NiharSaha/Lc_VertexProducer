@@ -68,11 +68,17 @@ float cand2Mass_sigma[2] = {protonMassLamC3P_sigma, piMassLamC3P_sigma};
 #define PION_MASS   0.13957018
 #define KAON_MASS   0.493677
 
+//These are defined to limit the array size, to be consistent with Dfinder!
+#define MAX_CAN       20000
+#define MAX_Vertices 4000
+#define MAX_TRACK    6000
+#define MAX_MUON     10000
+#define MAX_GEN      6000
+#define MAX_BX       150
+#define MAX_TRIGGER  30
 
 
 using std::vector;
-//using std::cout;
-//using std::endl;
 using std::string;
 using namespace reco;
 using namespace edm;
@@ -268,7 +274,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   if (vtxCollection.size() > 0 && !vtxPrimary->isFake() )
   {
-    if (vtxCollection.size() >=4000){
+    if (vtxCollection.size() >=MAX_Vertices){
       std::cout<<"ERROR: number of  Vertices exceeds the size of array!"<<std::endl;
       return;
     }
@@ -312,21 +318,19 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
       i_tk++;
 
 
-      if (passedTrk >= 6000){
+      if (passedTrk >= MAX_TRACK){
 	std::cout<<"ERROR: number of tracks exceeds the size of array!"<<std::endl;
 	break;
       }
     
       isNeededTrack.push_back(false);
 
-    // Make sure the candidate is charged and has tracking information    
-    
+      // Make sure the candidate is charged and has tracking information    
       if (!tk_it->hasTrackDetails()) continue;
       if (abs(tk_it->charge()) != 1) continue;
       if (tk_it->pt() < tkPtCut) continue;
       if (fabs(tk_it->eta()) > tkEtaCut) continue;
 
-      //std::cout<<"track Chi2="<<tk_it->pseudoTrack().normalizedChi2()<<std::endl;
       
       //if(tk_it->pseudoTrack().normalizedChi2() > tkChi2Cut) continue;
       //if(tk_it->pseudoTrack().numberOfValidHits() < tkNhitsCut) continue;
@@ -490,8 +494,6 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
   void LamC3PFitter::fitLamCCandidates(
 				       const std::vector<pat::PackedCandidate> input_tracks, 
-				       //const std::vector<edm::Ptr<pat::PackedCandidate>> input_tracks,
-				       
 				       //reco::Vertex thePrimaryV,
 				       //reco::Vertex theBeamSpotV,
 				       math::XYZPoint bestvtx,
@@ -524,18 +526,11 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
     //constrain fit fitter
     KinematicConstrainedVertexFitter kcv_tktk_fitter;
 
-    //const edm::EventSetup& iSetup
-    //edm::ESHandle<MagneticField> bFieldHandle;
-    //iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
-    //const MagneticField *field = bFieldHandle.product();
 
     const MagneticField& bField = iSetup.getData(bField_esToken_);
     const MagneticField* field = &bField;
   
-    //const MagneticField *field = bField.product();
-    //AnalyticalImpactPointExtrapolator extrapolator(field);
-    //TransverseImpactPointExtrapolator extrapolator(field);
-    //TrajectoryStateOnSurface tsos;
+
     
     TLorentzVector v4_tk;
     std::vector<TLorentzVector> tktk_4vecs;//fitted tks
@@ -555,15 +550,13 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
 
 
-    //float LamC3P_TotalE={0.0};
-
 
     int Trk_idx = 0;
     
     for(int i = 0; i < int(selectedTkhidxSet.size()); i++){
     
-      //if(theLamC3Ps.size() > 100000) break;      
-      if(Trk_idx >= 20000) break; //To match with Dfinder!!!
+      //if(theLamC3Ps.size() >= MAX_CAN) break;      
+      if(Trk_idx >= MAX_CAN) break; //To match with Dfinder!!!
       
       //clear before using
       v4_tk.Clear();

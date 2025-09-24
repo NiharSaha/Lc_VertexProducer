@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-lamc3pselector = cms.EDProducer('VertexCompositeSelector_LamC3P',
+lamc3pselector = cms.EDProducer('VCSelector_LamC3P',
   doGenMatching = cms.bool(False),
   hasSwap = cms.untracked.bool(False),
   decayInGen = cms.untracked.bool(False),
