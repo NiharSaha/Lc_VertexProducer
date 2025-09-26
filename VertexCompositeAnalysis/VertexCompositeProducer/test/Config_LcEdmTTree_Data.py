@@ -27,10 +27,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.TFileService = cms.Service("TFileService",
-    fileName =cms.string('TTreeData_Lc_tkpt1_dpt4_maxcand20k_evt1000_sept24.root'))
+    fileName =cms.string('TTreeData_Lc_tkpt1_dpt4_maxcand20k_evt100_sept24_v3.root'))
 
 
 # Define the input source

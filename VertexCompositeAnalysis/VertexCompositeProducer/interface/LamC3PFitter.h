@@ -339,7 +339,14 @@ struct TrackXYZ {
     
   };//P4  
 
-
+  struct ImpactParameters {
+    double dz;
+    double dxy;
+    double dzError;
+    double dxyError;
+};
+  
+  
 
   std::vector<Track> lst;
   std::vector<TrackXYZP2> lstXYZP2;
@@ -366,11 +373,9 @@ struct TrackXYZ {
   
   void fitLamCCandidates(
 			 const std::vector<pat::PackedCandidate> input_tracks,
-			 //const std::vector<edm::Ptr<pat::PackedCandidate>> input_tracks,
-			 //reco::Vertex thePrimaryV,
-			 //reco::Vertex theBeamSpotV,
-			 math::XYZPoint bestvtx,
-			 math::XYZPoint bestvtxErr,
+			 const math::XYZPoint bestvtx,
+			 const math::XYZPoint bestvtxErr,
+			 const ImpactParameters ip_params,
 			 std::vector<Track> lst,
 			 std::vector<TrackXYZP2> lstXYZP2,
 			 float *mass_window,
