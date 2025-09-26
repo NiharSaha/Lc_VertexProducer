@@ -98,6 +98,8 @@ struct CandidateData {
     std::vector<float> ndf;
     std::vector<float> agl_abs;
     std::vector<float> Ddca;
+  std::vector<float> Ddca_fitter;
+  std::vector<float> Ddca_err;
     std::vector<float> agl2D_abs;
     std::vector<float> dlos2D;
     std::vector<float> dl2D;
@@ -282,6 +284,8 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
     data.ndf.clear();
     data.agl_abs.clear();
     data.Ddca.clear();
+    data.Ddca_fitter.clear();
+    data.Ddca_err.clear();
     data.agl2D_abs.clear();
     data.dlos2D.clear();
     data.dl2D.clear();
@@ -377,6 +381,8 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
     data.ndf.resize(newSize);
     data.agl_abs.resize(newSize);
     data.Ddca.resize(newSize);
+    data.Ddca_fitter.resize(newSize);
+    data.Ddca_err.resize(newSize);
     data.agl2D_abs.resize(newSize);
     data.dlos2D.resize(newSize);
     data.dl2D.resize(newSize);
@@ -1023,7 +1029,10 @@ void VCTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, const edm::EventS
 	  
 	  
 	  candInfo.agl_abs[it] = secvec.Angle(ptosvec);
-	  //Ddca[it] = ptosvec.Mag() * TMath::Sin(agl_abs[it]);
+	  candInfo.Ddca[it] = ptosvec.Mag() * TMath::Sin(candInfo.agl_abs[it]);
+	  candInfo.Ddca_fitter[it] = trk.userFloat("Ddca");
+	  candInfo.Ddca_err[it] = trk.userFloat("Ddca_err");
+
 	  candInfo.agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
 	  	  
 	  float r2lxyBS = (secvx-BSx-(secvz-BSz)*BSdxdz) * (secvx-BSx-(secvz-BSz)*BSdxdz) + (secvy-BSy-(secvz-BSz)*BSdydz) * (secvy-BSy-(secvz-BSz)*BSdydz);
@@ -1247,6 +1256,8 @@ VCTreeProducer_LamC3P::initTree()
 		  VertexCompositeNtuple->Branch("VtxChi2", &candInfo.vtxChi2);
 		  VertexCompositeNtuple->Branch("3DPointingAngle", &candInfo.agl_abs);
 		  VertexCompositeNtuple->Branch("Ddca", &candInfo.Ddca);
+		  VertexCompositeNtuple->Branch("Ddca_fitter", &candInfo.Ddca_fitter);
+		  VertexCompositeNtuple->Branch("Ddca_err", &candInfo.Ddca_err);
 		  VertexCompositeNtuple->Branch("2DPointingAngle", &candInfo.agl2D_abs);
 		  VertexCompositeNtuple->Branch("3DDecayLengthSignificance", &candInfo.dlos);
 		  VertexCompositeNtuple->Branch("3DDecayLength", &candInfo.dl);

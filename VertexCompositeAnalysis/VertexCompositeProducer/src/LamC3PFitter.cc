@@ -1,3 +1,15 @@
+
+//+++++++++++++++++++++++++++++++++++
+
+//Code owner: Nihar Ranjan saha
+//contact mail: nihar.ranjan.saha@cern.ch
+//Date: 24 Sept 2025
+
+//+++++++++++++++++++++++++++++++++++
+
+
+
+
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PFitter.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
@@ -34,6 +46,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 
 #include "DataFormats/Math/interface/Vector3D.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
 
 #include <vector>
 #include <Math/Functions.h>
@@ -311,7 +324,8 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
     int passedTrk=0;
 
     std::vector<bool> isNeededTrack;
-
+    ImpactParameters ip_params;
+    
     //for (size_t i = 0; i < packedHandle->size(); ++i) {
     for (std::vector<pat::PackedCandidate>::const_iterator tk_it=input_tracks.begin(); tk_it != input_tracks.end(); tk_it++) {
 
@@ -358,6 +372,9 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
     dzerror = TMath::Sqrt(tk_it->pseudoTrack().dzError()*tk_it->pseudoTrack().dzError() + zVtxError*zVtxError);
     dxyerror = TMath::Sqrt(tk_it->pseudoTrack().dxyError()*tk_it->pseudoTrack().dxyError() + xVtxError*yVtxError);
 
+    ip_params = {dzvtx, dxyvtx, dzerror, dxyerror};
+
+    
     if (fabs(dzvtx / dzerror) <= dauLongImpactSigCut) continue;
     if (fabs(dxyvtx / dxyerror) <= dauTransImpactSigCut) continue;
 
@@ -382,12 +399,11 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 		  );
     
 
-	      passedTrk++;
+    passedTrk++;
 			
 
     }//-----End track loops
 
-    
     //int n = (int) lst.size();    
     for (int i = 0; i < (int)lst.size(); i ++) {
       TrackXYZP2 tr = lst[i];
@@ -399,7 +415,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
   
 
   float mass_window[2] = {2.1, 2.5};  
-  fitLamCCandidates(input_tracks, bestvtx, bestvtxErr, lst, lstXYZP2, mass_window, iEvent, iSetup);
+  fitLamCCandidates(input_tracks, bestvtx, bestvtxErr, ip_params, lst, lstXYZP2, mass_window, iEvent, iSetup);
 
 }
 
@@ -494,10 +510,9 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
 
   void LamC3PFitter::fitLamCCandidates(
 				       const std::vector<pat::PackedCandidate> input_tracks, 
-				       //reco::Vertex thePrimaryV,
-				       //reco::Vertex theBeamSpotV,
-				       math::XYZPoint bestvtx,
-				       math::XYZPoint bestvtxErr,
+				       const math::XYZPoint bestvtx,
+				       const math::XYZPoint bestvtxErr,
+				       const ImpactParameters ip,
 				       vector<Track> lst,
 				       vector<TrackXYZP2> lstXYZP2,
 				       float * mass_window,
@@ -773,11 +788,9 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
           continue;
 
 
-	//AnalyticalImpactPointExtrapolator extrap(magField);
-	TransverseImpactPointExtrapolator extrap(magField); 
-	TrajectoryStateOnSurface tsos =
-	  extrap.extrapolate(LamC3Pcand->currentState().freeTrajectoryState(),
-			     RecoVertex::convertPos(vtxPrimary->position()));
+	AnalyticalImpactPointExtrapolator extrapolator(magField);
+	//TransverseImpactPointExtrapolator extrapolator(magField); 
+	TrajectoryStateOnSurface tsos = extrapolator.extrapolate(LamC3Pcand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
         if (!tsos.isValid())continue;
 	
         Measurement1D cur3DIP;
@@ -826,10 +839,16 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
       theLamC3P.addUserFloat("zVtxError", bestvtxErr.z());
       theLamC3P.addUserFloat("vtxChi2", LamC3P_VtxChi2);
       theLamC3P.addUserFloat("vtxNdof", LamC3P_VtxNdof);
-      //theLamC3P.addUserFloat("dzvtx", dzvtx);
-      //theLamC3P.addUserFloat("dxyvtx", dxyvtx);
-      //theLamC3P.addUserFloat("dzError", dzerror);
-      //theLamC3P.addUserFloat("dxyError", dxyerror);
+      theLamC3P.addUserFloat("dzvtx", ip.dz);
+      theLamC3P.addUserFloat("dxyvtx", ip.dxy);
+      theLamC3P.addUserFloat("dzError", ip.dzError);
+      theLamC3P.addUserFloat("dxyError", ip.dxyError);
+      //Newly added
+      theLamC3P.addUserFloat("Ddca", cur3DIP.value()); 
+      theLamC3P.addUserFloat("Ddca_err", cur3DIP.error()); 
+      
+      
+      
 	
       for (int ii = 0; ii < 3; ++ii)
         {
