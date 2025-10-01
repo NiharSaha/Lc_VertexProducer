@@ -3,7 +3,6 @@ import FWCore.ParameterSet.Config as cms
 eventinfoana = cms.EDAnalyzer('EventInfoTreeProducer',
   beamSpotSrc = cms.untracked.InputTag("offlineBeamSpot"),
   VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  #TrackCollection = cms.untracked.InputTag("generalTracks"),
   TrackCollection = cms.untracked.InputTag("packedPFCandidates"),
 
   #Trigger info
