@@ -5,6 +5,12 @@
 //contact mail: nihar.ranjan.saha@cern.ch
 //Date: 24 Sept 2025
 
+/*
+Note: This code named as Fitter, where
+the reconstruction of Lc candidates is
+done out of all charged track from miniAOD data.
+*/
+
 //+++++++++++++++++++++++++++++++++++
 
 
@@ -844,8 +850,8 @@ void LamC3PFitter::TkCombinationPermutation_Lc_v3(
       theLamC3P.addUserFloat("dzError", ip.dzError);
       theLamC3P.addUserFloat("dxyError", ip.dxyError);
       //Newly added
-      theLamC3P.addUserFloat("Ddca", cur3DIP.value()); 
-      theLamC3P.addUserFloat("Ddca_err", cur3DIP.error()); 
+      theLamC3P.addUserFloat("ip3d", cur3DIP.value()); 
+      theLamC3P.addUserFloat("ip3derr", cur3DIP.error()); 
       
       
       

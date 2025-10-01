@@ -1,3 +1,18 @@
+//+++++++++++++++++++++++++++++++++++                                                                                                            
+
+//Code owner: Nihar Ranjan saha                                                                                                                  
+//contact mail: nihar.ranjan.saha@cern.ch                                                                                                        
+//Date: 24 Sept 2025                                                                                                                             
+
+/*
+Note: This code, called TTree producer, where
+we fill all the required variables into output
+TTree. You can add more branches here according
+to your analysis. Here, all the candidates are
+already passed selector conditions.
+*/ 
+//+++++++++++++++++++++++++++++++++++
+
 // system include files
 #include <memory>
 #include <string>
@@ -98,8 +113,8 @@ struct CandidateData {
     std::vector<float> ndf;
     std::vector<float> agl_abs;
     std::vector<float> Ddca;
-  std::vector<float> Ddca_fitter;
-  std::vector<float> Ddca_err;
+  std::vector<float> ip3d;
+  std::vector<float> ip3derr;
     std::vector<float> agl2D_abs;
     std::vector<float> dlos2D;
     std::vector<float> dl2D;
@@ -266,103 +281,6 @@ class VCTreeProducer_LamC3P : public edm::one::EDAnalyzer<> {
 
 void manageVectorsSize(CandidateData& data, size_t newSize) {
 
-  // Clear all vectors first to remove old data
-    data.mva.clear();
-    data.pt.clear();
-    data.eta.clear();
-    data.phi.clear();
-    data.flavor.clear();
-    data.y.clear();
-    data.mass.clear();
-    data.VtxProb.clear();
-    data.dlos.clear();
-    data.dl.clear();
-    data.dlerror.clear();
-    data.DlxyBS.clear();
-    data.DlxyBSErr.clear();
-    data.vtxChi2.clear();
-    data.ndf.clear();
-    data.agl_abs.clear();
-    data.Ddca.clear();
-    data.Ddca_fitter.clear();
-    data.Ddca_err.clear();
-    data.agl2D_abs.clear();
-    data.dlos2D.clear();
-    data.dl2D.clear();
-    data.dl2Derror.clear();
-    data.isSwap.clear();
-    data.matchGEN.clear();
-    data.idmom_reco.clear();
-    data.idd1_reco.clear();
-    data.idd2_reco.clear();
-    data.idd3_reco.clear();
-
-    data.gen_agl_abs.clear();
-    data.gen_agl2D_abs.clear();
-    data.gen_dl.clear();
-    data.gen_dl2D.clear();
-
-    data.dzos1.clear();
-    data.dzos2.clear();
-    data.dzos3.clear();
-    data.dxyos1.clear();
-    data.dxyos2.clear();
-    data.dxyos3.clear();
-    data.pt1.clear();
-    data.pt2.clear();
-    data.pt3.clear();
-    data.ptErr1.clear();
-    data.ptErr2.clear();
-    data.ptErr3.clear();
-    data.p1.clear();
-    data.p2.clear();
-    data.p3.clear();
-    data.Dtrk1Dz1.clear();
-    data.Dtrk2Dz1.clear();
-    data.Dtrk3Dz1.clear();
-    data.Dtrk1Dxy1.clear();
-    data.Dtrk2Dxy1.clear();
-    data.Dtrk3Dxy1.clear();
-    data.Dtrk1DzError1.clear();
-    data.Dtrk2DzError1.clear();
-    data.Dtrk3DzError1.clear();
-    data.Dtrk1DxyError1.clear();
-    data.Dtrk2DxyError1.clear();
-    data.Dtrk3DxyError1.clear();
-    data.eta1.clear();
-    data.eta2.clear();
-    data.eta3.clear();
-    data.phi1.clear();
-    data.phi2.clear();
-    data.phi3.clear();
-    data.charge1.clear();
-    data.charge2.clear();
-    data.charge3.clear();
-    data.pid1.clear();
-    data.pid2.clear();
-    data.pid3.clear();
-    data.tof1.clear();
-    data.tof2.clear();
-    data.tof3.clear();
-    data.H2dedx1.clear();
-    data.H2dedx2.clear();
-    data.H2dedx3.clear();
-    data.T4dedx1.clear();
-    data.T4dedx2.clear();
-    data.T4dedx3.clear();
-    data.trkChi1.clear();
-    data.trkChi2.clear();
-    data.trkChi3.clear();
-
-    data.pt_gen.clear();
-    data.eta_gen.clear();
-    data.idmom.clear();
-    data.y_gen.clear();
-    data.phi_gen.clear();
-    data.iddau1.clear();
-    data.iddau2.clear();
-    data.iddau3.clear();
-
     // Now resize all vectors to the new size
     data.mva.resize(newSize);
     data.pt.resize(newSize);
@@ -381,8 +299,8 @@ void manageVectorsSize(CandidateData& data, size_t newSize) {
     data.ndf.resize(newSize);
     data.agl_abs.resize(newSize);
     data.Ddca.resize(newSize);
-    data.Ddca_fitter.resize(newSize);
-    data.Ddca_err.resize(newSize);
+    data.ip3d.resize(newSize);
+    data.ip3derr.resize(newSize);
     data.agl2D_abs.resize(newSize);
     data.dlos2D.resize(newSize);
     data.dl2D.resize(newSize);
@@ -1030,8 +948,8 @@ void VCTreeProducer_LamC3P::fillRECO(const edm::Event& iEvent, const edm::EventS
 	  
 	  candInfo.agl_abs[it] = secvec.Angle(ptosvec);
 	  candInfo.Ddca[it] = ptosvec.Mag() * TMath::Sin(candInfo.agl_abs[it]);
-	  candInfo.Ddca_fitter[it] = trk.userFloat("Ddca");
-	  candInfo.Ddca_err[it] = trk.userFloat("Ddca_err");
+	  candInfo.ip3d[it] = trk.userFloat("ip3d");
+	  candInfo.ip3derr[it] = trk.userFloat("ip3derr");
 
 	  candInfo.agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
 	  	  
@@ -1256,8 +1174,8 @@ VCTreeProducer_LamC3P::initTree()
 		  VertexCompositeNtuple->Branch("VtxChi2", &candInfo.vtxChi2);
 		  VertexCompositeNtuple->Branch("3DPointingAngle", &candInfo.agl_abs);
 		  VertexCompositeNtuple->Branch("Ddca", &candInfo.Ddca);
-		  VertexCompositeNtuple->Branch("Ddca_fitter", &candInfo.Ddca_fitter);
-		  VertexCompositeNtuple->Branch("Ddca_err", &candInfo.Ddca_err);
+		  VertexCompositeNtuple->Branch("ip3d", &candInfo.ip3d);
+		  VertexCompositeNtuple->Branch("ip3derr", &candInfo.ip3derr);
 		  VertexCompositeNtuple->Branch("2DPointingAngle", &candInfo.agl2D_abs);
 		  VertexCompositeNtuple->Branch("3DDecayLengthSignificance", &candInfo.dlos);
 		  VertexCompositeNtuple->Branch("3DDecayLength", &candInfo.dl);

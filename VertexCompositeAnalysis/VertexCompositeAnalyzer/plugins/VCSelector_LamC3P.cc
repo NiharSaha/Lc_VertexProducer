@@ -1,3 +1,17 @@
+//+++++++++++++++++++++++++++++++++++                                                                                                            
+
+//Code owner: Nihar Ranjan saha                                                                                                                  
+//contact mail: nihar.ranjan.saha@cern.ch                                                                                                        
+//Date: 24 Sept 2025                                                                                                                             
+
+/*Note: This code, called selector,where
+we apply all necessary selections/cuts to
+Lc candidates and daughters coming from
+Fitter code before saving into TTree.
+*/
+//+++++++++++++++++++++++++++++++++++
+
+
 // system include files
 #include <memory>
 #include <string>

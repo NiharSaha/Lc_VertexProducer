@@ -1,4 +1,8 @@
-
+//+++++++++++++++++++++++++++++++++++                                                                                                                    
+//Code owner: Nihar Ranjan saha
+//contact mail: nihar.ranjan.saha@cern.ch                                                                                                                
+//Date: 24 Sept 2025                                                                                                                                     
+//+++++++++++++++++++++++++++++++++++
 /**\class LamC3PProducer LamC3PProducer.cc VertexCompositeAnalysis/VertexCompositeProducer/src/LamC3PProducer.cc
 
  Description: <one line class summary>
@@ -26,11 +30,6 @@ theCandidates(iConfig, consumesCollector(), selectedTkhidxSetVec)
   if(useAnyMVA_) produces<MVACollection>("MVAValuesLamC3P");
 }
 
-
-/*LamC3PProducer::LamC3PProducer(const edm::ParameterSet &iConfig) : theCandidates(iConfig, consumesCollector())
-{
-   produces<pat::CompositeCandidateCollection>("LamC3P");
-   }*/
 
 
 // (Empty) Destructor
